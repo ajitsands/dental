@@ -5,11 +5,16 @@ class Patient extends Controller {
     private $patientModel;
 
     public function __construct() {
+        $this->checkAuth();
         $this->patientModel = $this->model('PatientModel');
     }
 
     public function index() {
-        $data = ['title' => 'Patient Management'];
+        $patients = $this->patientModel->getPatients();
+        $data = [
+            'title' => 'Patient Management',
+            'patients' => $patients
+        ];
         $this->view('patients/index', $data);
     }
 
@@ -23,14 +28,20 @@ class Patient extends Controller {
 
     public function register() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            header('Content-Type: application/json');
+            
             // Sanitize
+            $medical_history = trim($_POST['medical_history']);
+            $medications = trim($_POST['medications']);
+            $full_history = $medical_history . ($medications ? "\nMedications: " . $medications : "");
+
             $data = [
                 'name' => trim($_POST['name']),
                 'age' => trim($_POST['age']),
                 'gender' => trim($_POST['gender']),
                 'contact' => trim($_POST['contact']),
                 'email' => trim($_POST['email']),
-                'medical_history' => trim($_POST['medical_history']),
+                'medical_history' => $full_history,
                 'dental_history' => trim($_POST['dental_history']),
                 'medical_alerts' => isset($_POST['medical_alert']) ? 'CRITICAL' : ''
             ];
@@ -38,8 +49,9 @@ class Patient extends Controller {
             if ($this->patientModel->addPatient($data)) {
                 echo json_encode(['status' => 'success', 'message' => 'Patient registered successfully']);
             } else {
-                echo json_encode(['status' => 'error', 'message' => 'Something went wrong']);
+                echo json_encode(['status' => 'error', 'message' => 'Database error occurred']);
             }
+            exit;
         } else {
             $data = ['title' => 'Register Patient'];
             $this->view('patients/register', $data);

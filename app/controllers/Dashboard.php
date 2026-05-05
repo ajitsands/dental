@@ -3,12 +3,13 @@
 
 class Dashboard extends Controller {
     public function __construct() {
-        // Auth check would go here
+        $this->checkAuth();
     }
 
     public function index() {
         $data = [
-            'title' => 'Dashboard - DenSmart'
+            'title' => 'Dashboard - DenSmart',
+            'branch_name' => $_SESSION['branch_name'] ?? 'Unknown Branch'
         ];
         $this->view('dashboard/index', $data);
     }

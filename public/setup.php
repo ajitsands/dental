@@ -38,6 +38,16 @@ try {
     }
 
     echo "<p style='color: green;'>✔ All tables created successfully.</p>";
+
+    // Insert Default Data
+    $pdo->exec("INSERT IGNORE INTO branches (id, name, country) VALUES (1, 'Main Clinic', 'India')");
+    $pdo->exec("INSERT IGNORE INTO roles (id, name) VALUES (1, 'Admin'), (2, 'Dentist'), (3, 'Receptionist')");
+    
+    $password = password_hash('admin123', PASSWORD_DEFAULT);
+    $pdo->exec("INSERT IGNORE INTO users (name, email, password, branch_id, role_id) 
+                VALUES ('Administrator', 'admin@densmart.com', '$password', 1, 1)");
+
+    echo "<p style='color: green;'>✔ Default Admin created: <b>admin@densmart.com</b> / <b>admin123</b></p>";
     echo "<p style='color: blue;'><b>Next steps:</b> Remove this file for security and visit <a href='index.php'>Dashboard</a>.</p>";
 
 } catch (PDOException $e) {

@@ -1,4 +1,4 @@
-<?php require_once '../app/views/layouts/header.php'; ?>
+<?php require_once APPROOT . '/app/views/layouts/header.php'; ?>
 
 <style>
     .tooth-container {
@@ -192,4 +192,4 @@ function saveToothData() {
 }
 </script>
 
-<?php require_once '../app/views/layouts/footer.php'; ?>
+<?php require_once APPROOT . '/app/views/layouts/footer.php'; ?>

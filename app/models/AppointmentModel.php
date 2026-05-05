@@ -19,12 +19,25 @@ class AppointmentModel extends Model {
 
     // Add appointment
     public function addAppointment($data) {
+        // Ensure at least one chair exists to satisfy foreign key
+        $this->db->query("SELECT id FROM chairs LIMIT 1");
+        $chair = $this->db->single();
+        
+        if (!$chair) {
+            $this->db->query("INSERT INTO chairs (branch_id, name) VALUES (:branch_id, 'Chair 1')");
+            $this->db->bind(':branch_id', $_SESSION['branch_id'] ?? 1);
+            $this->db->execute();
+            $chairId = $this->db->lastInsertId();
+        } else {
+            $chairId = $chair->id;
+        }
+
         $this->db->query('INSERT INTO appointments (patient_id, user_id, chair_id, start_time, end_time, notes) 
                           VALUES (:patient_id, :user_id, :chair_id, :start_time, :end_time, :notes)');
         
         $this->db->bind(':patient_id', $data['patient_id']);
         $this->db->bind(':user_id', $data['user_id']);
-        $this->db->bind(':chair_id', $data['chair_id']);
+        $this->db->bind(':chair_id', $chairId);
         $this->db->bind(':start_time', $data['start_time']);
         $this->db->bind(':end_time', $data['end_time']);
         $this->db->bind(':notes', $data['notes']);

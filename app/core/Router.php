@@ -11,13 +11,13 @@ class Router {
 
         // Look in controllers for first value
         if (isset($url[0])) {
-            if (file_exists('../app/controllers/' . ucwords($url[0]) . '.php')) {
+            if (file_exists(APPROOT . '/app/controllers/' . ucwords($url[0]) . '.php')) {
                 $this->currentController = ucwords($url[0]);
                 unset($url[0]);
             }
         }
 
-        require_once '../app/controllers/' . $this->currentController . '.php';
+        require_once APPROOT . '/app/controllers/' . $this->currentController . '.php';
         $this->currentController = new $this->currentController;
 
         // Check for second part of url

@@ -1,4 +1,4 @@
-<?php require_once '../app/views/layouts/header.php'; ?>
+<?php require_once APPROOT . '/app/views/layouts/header.php'; ?>
 
 <div class="row">
     <div class="col-md-3">
@@ -116,4 +116,4 @@
     </div>
 </div>
 
-<?php require_once '../app/views/layouts/footer.php'; ?>
+<?php require_once APPROOT . '/app/views/layouts/footer.php'; ?>

@@ -4,7 +4,7 @@ CREATE DATABASE IF NOT EXISTS densmart_db;
 USE densmart_db;
 
 -- Branches (Tenants)
-CREATE TABLE branches (
+CREATE TABLE IF NOT EXISTS branches (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     logo VARCHAR(255),
@@ -18,16 +18,19 @@ CREATE TABLE branches (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+INSERT IGNORE INTO branches (id, name, country, timezone, tax_type) 
+VALUES (1, 'DenSmart Main Clinic', 'India', 'Asia/Kolkata', 'GST');
+
 -- Roles
-CREATE TABLE roles (
+CREATE TABLE IF NOT EXISTS roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
-INSERT INTO roles (name) VALUES ('Admin'), ('Dentist'), ('Receptionist');
+INSERT IGNORE INTO roles (id, name) VALUES (1, 'Admin'), (2, 'Dentist'), (3, 'Receptionist');
 
 -- Users
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     branch_id INT,
     role_id INT,
@@ -42,7 +45,7 @@ CREATE TABLE users (
 );
 
 -- Patients
-CREATE TABLE patients (
+CREATE TABLE IF NOT EXISTS patients (
     id INT AUTO_INCREMENT PRIMARY KEY,
     branch_id INT,
     unique_id VARCHAR(20) NOT NULL UNIQUE,
@@ -60,7 +63,7 @@ CREATE TABLE patients (
 );
 
 -- Chairs
-CREATE TABLE chairs (
+CREATE TABLE IF NOT EXISTS chairs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     branch_id INT,
     name VARCHAR(50) NOT NULL,
@@ -68,7 +71,7 @@ CREATE TABLE chairs (
 );
 
 -- Appointments
-CREATE TABLE appointments (
+CREATE TABLE IF NOT EXISTS appointments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     patient_id INT,
     user_id INT, -- Doctor
@@ -84,7 +87,7 @@ CREATE TABLE appointments (
 );
 
 -- Tooth Chart (Odontogram)
-CREATE TABLE tooth_chart (
+CREATE TABLE IF NOT EXISTS tooth_chart (
     id INT AUTO_INCREMENT PRIMARY KEY,
     patient_id INT,
     tooth_number INT NOT NULL, -- 1-32 or ISO 11-48
@@ -95,7 +98,7 @@ CREATE TABLE tooth_chart (
 );
 
 -- Treatment Plans
-CREATE TABLE treatment_plans (
+CREATE TABLE IF NOT EXISTS treatment_plans (
     id INT AUTO_INCREMENT PRIMARY KEY,
     patient_id INT,
     name VARCHAR(255),
@@ -106,7 +109,7 @@ CREATE TABLE treatment_plans (
 );
 
 -- Procedures & Visits
-CREATE TABLE procedures (
+CREATE TABLE IF NOT EXISTS procedures (
     id INT AUTO_INCREMENT PRIMARY KEY,
     treatment_plan_id INT,
     appointment_id INT,
@@ -121,7 +124,7 @@ CREATE TABLE procedures (
 );
 
 -- Invoices
-CREATE TABLE invoices (
+CREATE TABLE IF NOT EXISTS invoices (
     id INT AUTO_INCREMENT PRIMARY KEY,
     branch_id INT,
     patient_id INT,
@@ -137,7 +140,7 @@ CREATE TABLE invoices (
 );
 
 -- Payments
-CREATE TABLE payments (
+CREATE TABLE IF NOT EXISTS payments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     invoice_id INT,
     amount DECIMAL(10, 2),
@@ -147,7 +150,7 @@ CREATE TABLE payments (
 );
 
 -- Inventory
-CREATE TABLE inventory (
+CREATE TABLE IF NOT EXISTS inventory (
     id INT AUTO_INCREMENT PRIMARY KEY,
     branch_id INT,
     item_name VARCHAR(255),

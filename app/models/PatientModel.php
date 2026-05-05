@@ -14,10 +14,22 @@ class PatientModel extends Model {
     }
 
     public function addPatient($data) {
+        // First, ensure at least one branch exists to satisfy foreign key
+        $this->db->query("SELECT id FROM branches LIMIT 1");
+        $branch = $this->db->single();
+        
+        if (!$branch) {
+            $this->db->query("INSERT INTO branches (name, country) VALUES ('Main Clinic', 'India')");
+            $this->db->execute();
+            $branchId = $this->db->lastInsertId();
+        } else {
+            $branchId = $branch->id;
+        }
+
         $this->db->query('INSERT INTO patients (branch_id, unique_id, name, age, gender, contact, email, medical_history, dental_history, medical_alerts) 
                           VALUES (:branch_id, :unique_id, :name, :age, :gender, :contact, :email, :medical_history, :dental_history, :medical_alerts)');
         
-        $this->db->bind(':branch_id', 1); // Mock branch
+        $this->db->bind(':branch_id', $branchId);
         $this->db->bind(':unique_id', 'P-' . rand(1000, 9999));
         $this->db->bind(':name', $data['name']);
         $this->db->bind(':age', $data['age']);
