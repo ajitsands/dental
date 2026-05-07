@@ -29,6 +29,11 @@ class Staff extends Controller {
         }
 
         $roles = $this->userModel->getRoles();
+        if (!$isSuperAdmin) {
+            $roles = array_filter($roles, function($role) {
+                return (int)$role->id !== 6;
+            });
+        }
         
         $data = [
             'title' => 'Staff Management - DenSmart',

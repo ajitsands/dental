@@ -119,7 +119,7 @@
                                         <tr>
                                             <td class="fw-bold"><?php echo $inv->invoice_number; ?></td>
                                             <td><span class="small"><?php echo $inv->branch_name; ?></span></td>
-                                            <td class="fw-bold text-success"><?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($inv->final_amount, 2); ?></td>
+                                            <td class="fw-bold text-success"><?php echo formatCurrency($inv->final_amount); ?></td>
                                             <td>
                                                 <span class="badge <?php echo ($inv->status == 'Paid') ? 'bg-success' : 'bg-warning'; ?>">
                                                     <?php echo $inv->status; ?>

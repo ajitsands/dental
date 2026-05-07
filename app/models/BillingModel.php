@@ -81,4 +81,13 @@ class BillingModel extends Model {
         $this->db->bind(':id', $invoiceId);
         return $this->db->single();
     }
+
+    public function getInvoiceById($id) {
+        $this->db->query('SELECT i.*, p.name as patient_name, p.unique_id as patient_uid 
+                          FROM invoices i 
+                          JOIN patients p ON i.patient_id = p.id 
+                          WHERE i.id = :id');
+        $this->db->bind(':id', $id);
+        return $this->db->single();
+    }
 }

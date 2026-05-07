@@ -2,11 +2,11 @@
 
 <div class="row mb-4">
     <div class="col-md-8">
-        <h2 class="mb-1">Billing & Invoices</h2>
-        <p class="text-muted">Manage payments and track staff commissions for <strong><?php echo $_SESSION['branch_name'] ?? 'Main Clinic'; ?></strong></p>
+        <h2 class="mb-1"><?php echo __('billing_invoices'); ?></h2>
+        <p class="text-muted"><?php echo __('manage_payments'); ?> <strong><?php echo $_SESSION['branch_name'] ?? 'Main Clinic'; ?></strong></p>
     </div>
     <div class="col-md-4 text-end">
-        <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#invoiceModal"><i class="fas fa-file-invoice me-1"></i> Create New Invoice</button>
+        <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#invoiceModal"><i class="fas fa-file-invoice me-1"></i> <?php echo __('create_new_invoice'); ?></button>
     </div>
 </div>
 
@@ -23,20 +23,20 @@
     ?>
     <div class="col-md-4">
         <div class="card bg-primary text-white p-3 shadow-sm border-0">
-            <h6 class="mb-1 opacity-75 small uppercase">Total Revenue</h6>
-            <h3 class="mb-0 fw-bold"><?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($totalRevenue, 2); ?></h3>
+            <h6 class="mb-1 opacity-75 small uppercase"><?php echo __('total_revenue'); ?></h6>
+            <h3 class="mb-0 fw-bold"><?php echo formatCurrency($totalRevenue); ?></h3>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card bg-success text-white p-3 shadow-sm border-0">
-            <h6 class="mb-1 opacity-75 small uppercase">Collected Amount</h6>
-            <h3 class="mb-0 fw-bold"><?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($totalPaid, 2); ?></h3>
+            <h6 class="mb-1 opacity-75 small uppercase"><?php echo __('collected_amount'); ?></h6>
+            <h3 class="mb-0 fw-bold"><?php echo formatCurrency($totalPaid); ?></h3>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card bg-danger text-white p-3 shadow-sm border-0">
-            <h6 class="mb-1 opacity-75 small uppercase">Outstanding Dues</h6>
-            <h3 class="mb-0 fw-bold"><?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($dues, 2); ?></h3>
+            <h6 class="mb-1 opacity-75 small uppercase"><?php echo __('outstanding_dues'); ?></h6>
+            <h3 class="mb-0 fw-bold"><?php echo formatCurrency($dues); ?></h3>
         </div>
     </div>
 </div>
@@ -46,15 +46,15 @@
     <div class="card-body">
         <div class="table-responsive">
             <table id="invoiceTable" class="table table-hover align-middle">
-                <thead class="table-light">
+                <thead>
                     <tr>
-                        <th>Invoice #</th>
-                        <th>Patient</th>
-                        <th>Doctor</th>
-                        <th>Date</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th class="text-end">Actions</th>
+                        <th><?php echo __('invoice_num'); ?></th>
+                        <th><?php echo __('patient'); ?></th>
+                        <th><?php echo __('doctor'); ?></th>
+                        <th><?php echo __('date'); ?></th>
+                        <th><?php echo __('amount'); ?></th>
+                        <th><?php echo __('status'); ?></th>
+                        <th class="text-end"><?php echo __('actions'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -64,7 +64,7 @@
                         <td class="fw-medium"><?php echo $inv->patient_name; ?></td>
                         <td>Dr. <?php echo $inv->doctor_name; ?></td>
                         <td class="small"><?php echo date('M d, Y', strtotime($inv->created_at)); ?></td>
-                        <td class="fw-bold"><?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($inv->final_amount, 2); ?></td>
+                        <td class="fw-bold"><?php echo formatCurrency($inv->final_amount); ?></td>
                         <td>
                             <?php if($inv->status == 'Paid'): ?>
                                 <span class="badge bg-success-subtle text-success border border-success-subtle">Paid</span>
@@ -79,9 +79,9 @@
                                 <button class="btn btn-sm btn-outline-success" onclick="openPaymentModal(<?php echo $inv->id; ?>, <?php echo $inv->final_amount; ?>, '<?php echo $inv->invoice_number; ?>')" title="Record Payment">
                                     <i class="fas fa-money-bill-wave"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-secondary" title="Print">
+                                <a href="<?php echo BASE_URL; ?>/billing/printReceipt/<?php echo $inv->id; ?>" target="_blank" class="btn btn-sm btn-outline-secondary" title="Print Thermal Receipt">
                                     <i class="fas fa-print"></i>
-                                </button>
+                                </a>
                             </div>
                         </td>
                     </tr>
@@ -174,7 +174,7 @@
                                     <span class="fw-bold" id="subtotalText">0.00</span>
                                 </div>
                                 <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted">Tax (18% GST)</span>
+                                    <span class="text-muted" id="taxLabel">Tax (<?php echo ($_SESSION['tax_pct'] ?? 18) . '% ' . ($_SESSION['tax_type'] ?? 'GST'); ?>)</span>
                                     <span id="taxText">0.00</span>
                                 </div>
                                 <hr class="my-3">
@@ -216,7 +216,7 @@
                     <div class="mb-4">
                         <label class="form-label small fw-bold text-muted uppercase">Amount to Pay</label>
                         <div class="input-group">
-                            <span class="input-group-text border-0 bg-success text-white"><?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?></span>
+                            <span class="input-group-text border-0 bg-success text-white"><?php echo getCurrencySymbol(); ?></span>
                             <input type="number" name="amount" id="payAmount" class="form-control form-control-lg fw-bold border-0 bg-light text-success" required>
                         </div>
                         <div class="small mt-2">Maximum: <span class="fw-bold" id="payFullAmount"></span></div>
@@ -258,10 +258,7 @@ $(document).ready(function() {
     $('#invoiceTable').DataTable({
         "order": [[3, "desc"]],
         "pageLength": 10,
-        "language": {
-            "search": "_INPUT_",
-            "searchPlaceholder": "Filter invoices..."
-        }
+        "language": dtLanguage
     });
 
     $('.select2-init').select2({
@@ -303,7 +300,11 @@ function calculateTotals() {
         subtotal += total;
     });
 
-    const tax = subtotal * 0.18; 
+    const taxPct = <?php echo $_SESSION['tax_pct'] ?? 18; ?>;
+    let tax = 0;
+    if (taxPct > 0) {
+        tax = subtotal * (taxPct / 100);
+    }
     const final = subtotal + tax;
 
     $('#subtotalText').text(subtotal.toLocaleString('en-IN', {minimumFractionDigits: 2}));

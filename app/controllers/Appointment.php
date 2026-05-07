@@ -49,4 +49,23 @@ class Appointment extends Controller {
             exit;
         }
     }
+    public function cancel($id) {
+        header('Content-Type: application/json');
+        if ($this->appointmentModel->cancelAppointment($id)) {
+            echo json_encode(['status' => 'success', 'message' => 'Appointment cancelled successfully']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Failed to cancel appointment']);
+        }
+        exit;
+    }
+
+    public function extend($id) {
+        header('Content-Type: application/json');
+        if ($this->appointmentModel->extendAppointment($id, 30)) {
+            echo json_encode(['status' => 'success', 'message' => 'Appointment extended by 30 minutes']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Failed to extend appointment']);
+        }
+        exit;
+    }
 }

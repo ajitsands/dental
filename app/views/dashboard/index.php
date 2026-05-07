@@ -2,7 +2,7 @@
 
 <div class="row mb-4">
     <div class="col-md-8">
-        <h2 class="mb-1">Welcome back, <?php echo $_SESSION['user_name']; ?>!</h2>
+        <h2 class="mb-1"><?php echo __('welcome_back'); ?>, <?php echo $_SESSION['user_name']; ?>!</h2>
         <p class="text-muted">Clinic Workflow: <strong><?php echo $data['branch_name']; ?></strong> | <?php echo date('l, jS M Y'); ?></p>
     </div>
     <div class="col-md-4 text-end">
@@ -15,52 +15,52 @@
 <div class="row g-4 mb-4">
     <!-- Workflow Stats -->
     <div class="col-md-3">
-        <div class="card p-4 border-0 shadow-sm bg-white" style="border-radius: 20px;">
+        <div class="card p-4 border-0 shadow-sm" style="border-radius: 20px;">
             <div class="d-flex align-items-center">
                 <div class="densmart-logo bg-primary bg-opacity-10 text-primary me-3">
                     <i class="fas fa-calendar-check"></i>
                 </div>
                 <div>
-                    <h6 class="mb-0 text-muted small fw-bold uppercase">Total Booked</h6>
+                    <h6 class="mb-0 text-muted small fw-bold uppercase"><?php echo __('total_booked'); ?></h6>
                     <h3 class="mb-0 fw-bold"><?php echo count($data['todayAppointments']); ?></h3>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card p-4 border-0 shadow-sm bg-white" style="border-radius: 20px;">
+        <div class="card p-4 border-0 shadow-sm" style="border-radius: 20px;">
             <div class="d-flex align-items-center">
                 <div class="densmart-logo bg-warning bg-opacity-10 text-warning me-3">
                     <i class="fas fa-clock"></i>
                 </div>
                 <div>
-                    <h6 class="mb-0 text-muted small fw-bold uppercase">Waiting (Reported)</h6>
+                    <h6 class="mb-0 text-muted small fw-bold uppercase"><?php echo __('waiting_reported'); ?></h6>
                     <h3 class="mb-0 fw-bold" id="waitingCount">0</h3>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card p-4 border-0 shadow-sm bg-white" style="border-radius: 20px;">
+        <div class="card p-4 border-0 shadow-sm" style="border-radius: 20px;">
             <div class="d-flex align-items-center">
                 <div class="densmart-logo bg-info bg-opacity-10 text-info me-3">
                     <i class="fas fa-user-md"></i>
                 </div>
                 <div>
-                    <h6 class="mb-0 text-muted small fw-bold uppercase">In Consultation</h6>
+                    <h6 class="mb-0 text-muted small fw-bold uppercase"><?php echo __('in_consultation'); ?></h6>
                     <h3 class="mb-0 fw-bold" id="consultingCount">0</h3>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card p-4 border-0 shadow-sm bg-white" style="border-radius: 20px;">
+        <div class="card p-4 border-0 shadow-sm" style="border-radius: 20px;">
             <div class="d-flex align-items-center">
                 <div class="densmart-logo bg-success bg-opacity-10 text-success me-3">
                     <i class="fas fa-check-double"></i>
                 </div>
                 <div>
-                    <h6 class="mb-0 text-muted small fw-bold uppercase">Completed</h6>
+                    <h6 class="mb-0 text-muted small fw-bold uppercase"><?php echo __('completed'); ?></h6>
                     <h3 class="mb-0 fw-bold" id="completedCount">0</h3>
                 </div>
             </div>
@@ -72,24 +72,21 @@
     <div class="col-md-8">
         <div class="card border-0 shadow-sm h-100" style="border-radius: 20px;">
             <div class="card-header bg-transparent border-0 pt-4 px-4">
-                <h5 class="mb-0 fw-bold">Live Patient Queue & Schedule</h5>
+                <h5 class="mb-0 fw-bold"><?php echo __('live_queue'); ?></h5>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0" id="todayScheduleTable">
-                        <thead class="table-light">
+                        <thead>
                             <tr>
-                                <th class="ps-4">Patient</th>
-                                <th>Time</th>
-                                <th>Status</th>
-                                <th class="text-end pe-4">Clinical Actions</th>
+                                <th class="ps-4"><?php echo __('patient'); ?></th>
+                                <th><?php echo __('time'); ?></th>
+                                <th><?php echo __('status'); ?></th>
+                                <th class="text-end pe-4"><?php echo __('actions'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if(empty($data['todayAppointments'])): ?>
-                                <tr><td colspan="4" class="text-center py-5 text-muted">No appointments for today.</td></tr>
-                            <?php else: ?>
-                                <?php foreach($data['todayAppointments'] as $app): ?>
+                            <?php foreach($data['todayAppointments'] as $app): ?>
                                 <tr data-status="<?php echo $app->status; ?>">
                                     <td class="ps-4">
                                         <div class="d-flex align-items-center">
@@ -118,14 +115,13 @@
                                         <?php elseif($app->status == 'In Consultation'): ?>
                                             <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="openPrescriptionModal(<?php echo $app->id; ?>, '<?php echo $app->patient_name; ?>', <?php echo $app->patient_id; ?>)">Complete & Prescribe</button>
                                         <?php elseif($app->status == 'Completed'): ?>
-                                            <a href="<?php echo BASE_URL; ?>/dashboard/printPrescription/<?php echo $app->id; ?>" target="_blank" class="btn btn-sm btn-outline-dark rounded-pill px-3"><i class="fas fa-print me-1"></i> Prescription</a>
+                                            <a href="<?php echo BASE_URL; ?>/dashboard/printPrescription/<?php echo $app->id; ?>" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3"><i class="fas fa-print me-1"></i> Prescription</a>
                                         <?php else: ?>
                                             <button class="btn btn-sm btn-light rounded-pill px-3" onclick="updateStatus(<?php echo $app->id; ?>, 'Booked')">Reset Status</button>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
+                            <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
@@ -135,28 +131,50 @@
     <div class="col-md-4">
         <div class="card border-0 shadow-sm h-100" style="border-radius: 20px;">
             <div class="card-header bg-transparent border-0 pt-4 px-4">
-                <h5 class="mb-0 fw-bold">Quick Actions</h5>
+                <h5 class="mb-0 fw-bold"><?php echo __('quick_actions'); ?></h5>
             </div>
             <div class="card-body p-4">
                 <div class="d-grid gap-3">
-                    <a href="<?php echo BASE_URL; ?>/patient/register" class="btn btn-light text-start p-3 border rounded-3 shadow-sm hover-lift">
-                        <i class="fas fa-user-plus text-primary me-2"></i> Register New Patient
+                    <a href="<?php echo BASE_URL; ?>/patient/register" class="btn btn-outline-secondary text-start p-3 border rounded-3 shadow-sm hover-lift d-block mb-3">
+                        <i class="fas fa-user-plus text-primary me-2"></i> <?php echo __('register_new_patient'); ?>
                     </a>
-                    <a href="<?php echo BASE_URL; ?>/billing" class="btn btn-light text-start p-3 border rounded-3 shadow-sm hover-lift">
-                        <i class="fas fa-file-invoice-dollar text-success me-2"></i> Create New Invoice
+                    <a href="<?php echo BASE_URL; ?>/billing" class="btn btn-outline-secondary text-start p-3 border rounded-3 shadow-sm hover-lift d-block mb-3">
+                        <i class="fas fa-file-invoice-dollar text-success me-2"></i> <?php echo __('create_new_invoice'); ?>
                     </a>
-                    <a href="<?php echo BASE_URL; ?>/wallet" class="btn btn-light text-start p-3 border rounded-3 shadow-sm hover-lift">
-                        <i class="fas fa-wallet text-warning me-2"></i> Staff Commission Ledger
+                    <a href="<?php echo BASE_URL; ?>/wallet" class="btn btn-outline-secondary text-start p-3 border rounded-3 shadow-sm hover-lift d-block mb-3">
+                        <i class="fas fa-wallet text-warning me-2"></i> <?php echo __('staff_commission'); ?>
                     </a>
-                    <a href="<?php echo BASE_URL; ?>/patient/ledger" class="btn btn-light text-start p-3 border rounded-3 shadow-sm hover-lift">
-                        <i class="fas fa-address-book text-info me-2"></i> Patient Balances
+                    <a href="<?php echo BASE_URL; ?>/patient/ledger" class="btn btn-outline-secondary text-start p-3 border rounded-3 shadow-sm hover-lift d-block">
+                        <i class="fas fa-address-book text-info me-2"></i> <?php echo __('patient_balances'); ?>
                     </a>
                 </div>
                 
-                <div class="mt-4 p-3 bg-light rounded-3 border-start border-4 border-primary">
+                <div class="mt-4 p-3 rounded-3 border-start border-4 border-primary" style="background-color: var(--sidebar-active);">
                     <h6 class="fw-bold small mb-2"><i class="fas fa-lightbulb text-primary me-1"></i> Quick Tip</h6>
                     <p class="small text-muted mb-0">Use the <strong>Financials</strong> menu at the top to see global audit reports.</p>
                 </div>
+
+                <?php if(!empty($data['agingDebt'])): ?>
+                <div class="mt-4">
+                    <h6 class="fw-bold text-danger mb-3"><i class="fas fa-exclamation-circle me-1"></i> Aging Debt Alerts (>30 Days)</h6>
+                    <div class="list-group list-group-flush shadow-sm rounded-3 overflow-hidden border">
+                        <?php foreach($data['agingDebt'] as $debt): ?>
+                        <div class="list-group-item list-group-item-action p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-bold small text-dark"><?php echo $debt->name; ?></div>
+                                    <div class="small text-muted">Inv #<?php echo $debt->invoice_number; ?></div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-bold text-danger small"><?php echo formatCurrency($debt->final_amount - ($debt->paid_amount ?? 0)); ?></div>
+                                    <div class="small text-muted" style="font-size: 10px;"><?php echo date('M d', strtotime($debt->created_at)); ?></div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -199,7 +217,7 @@ $(document).ready(function() {
     
     $('#todayScheduleTable').DataTable({
         "pageLength": 10,
-        "language": { "search": "", "searchPlaceholder": "Filter queue..." }
+        "language": dtLanguage
     });
 
     updateCounters();

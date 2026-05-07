@@ -2,8 +2,8 @@
 
 <div class="row mb-4">
     <div class="col-md-8">
-        <h2 class="mb-1">Service Management</h2>
-        <p class="text-muted">Configure your procedures, status, and commission rates for doctors and staff.</p>
+        <h2 class="mb-1"><?php echo __('service_management'); ?></h2>
+        <p class="text-muted"><?php echo __('manage_treatments'); ?></p>
     </div>
     <div class="col-md-4 text-end">
         <button class="btn btn-primary shadow-sm rounded-pill px-4" onclick="openAddModal()">
@@ -33,7 +33,7 @@
                             <div class="small text-muted">ID: #<?php echo $service->id; ?></div>
                         </td>
                         <td class="fw-bold text-primary svc-cost">
-                            <?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($service->cost, 2); ?>
+                            <?php echo formatCurrency($service->cost); ?>
                         </td>
                         <td class="svc-comm">
                             <div class="d-flex gap-1">
@@ -84,7 +84,7 @@
                     </div>
                     <div class="row g-2 mb-3">
                         <div class="col-md-8">
-                            <label class="form-label small fw-bold">Standard Cost (<?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?>)</label>
+                            <label class="form-label small fw-bold">Standard Cost (<?php echo getCurrencySymbol(); ?>)</label>
                             <input type="number" name="cost" id="serviceCost" class="form-control" placeholder="5000" required>
                         </div>
                         <div class="col-md-4">
@@ -123,7 +123,7 @@
 
 <script>
 let serviceModal;
-const currencySymbol = '<?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?>';
+const currencySymbol = '<?php echo getCurrencySymbol(); ?>';
 
 $(document).ready(function() {
     serviceModal = new bootstrap.Modal(document.getElementById('serviceModal'));
@@ -177,7 +177,9 @@ function saveService() {
                 if (isEdit) {
                     const row = $(`#service-row-${serviceId}`);
                     row.find('.svc-name').text($('#serviceName').val());
-                    row.find('.svc-cost').text(`${currencySymbol} ${parseFloat($('#serviceCost').val()).toFixed(2)}`);
+                    const cost = parseFloat($('#serviceCost').val());
+                    const decimals = currencySymbol.includes('BHD') || currencySymbol.includes('KWD') || currencySymbol.includes('OMR') ? 3 : 2;
+                    row.find('.svc-cost').html(`${currencySymbol} ${cost.toFixed(decimals)}`);
                     
                     const status = $('#serviceStatus').val();
                     const statusHtml = status === 'Active' 

@@ -67,11 +67,59 @@ class Patient extends Controller {
     }
 
     public function chart($id = null) {
+        if (!$id) {
+            header('Location: ' . BASE_URL . '/patient');
+            exit;
+        }
+
+        // Auto-create table if missing (Developer convenience)
+        $db = new Database();
+        $db->query("CREATE TABLE IF NOT EXISTS dental_charts (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            patient_id INT NOT NULL,
+            tooth_number INT NOT NULL,
+            condition_name VARCHAR(50) NOT NULL,
+            notes TEXT,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY (patient_id, tooth_number)
+        )");
+        $db->execute();
+
+        // Ensure 'surfaces' column exists for existing tables
+        $db->query("SELECT COUNT(*) as count FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'dental_charts' AND COLUMN_NAME = 'surfaces'");
+        if ($db->single()->count == 0) {
+            $db->query("ALTER TABLE dental_charts ADD COLUMN surfaces VARCHAR(100) DEFAULT ''");
+            $db->execute();
+        }
+
+        $patient = $this->patientModel->getPatientById($id);
+        $chartData = $this->patientModel->getDentalChart($id);
+        
         $data = [
-            'title' => 'Dental Chart - DenSmart',
-            'patient_id' => $id
+            'title' => 'Dental Chart - ' . ($patient->name ?? 'Unknown'),
+            'patient' => $patient,
+            'chartData' => $chartData
         ];
         $this->view('patients/chart', $data);
+    }
+
+    public function saveChart() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            header('Content-Type: application/json');
+            
+            $patientId = $_POST['patient_id'];
+            $toothNumber = $_POST['tooth_number'];
+            $condition = $_POST['condition'];
+            $notes = $_POST['notes'] ?? '';
+            $surfaces = $_POST['surfaces'] ?? '';
+
+            if ($this->patientModel->saveDentalChart($patientId, $toothNumber, $condition, $notes, $surfaces)) {
+                echo json_encode(['status' => 'success', 'message' => 'Chart updated']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Failed to save chart']);
+            }
+            exit;
+        }
     }
 
     public function register() {
@@ -99,5 +147,13 @@ class Patient extends Controller {
             $data = ['title' => 'Register Patient'];
             $this->view('patients/register', $data);
         }
+    }
+    public function getPrescriptions($id) {
+        $appointmentModel = $this->model('AppointmentModel');
+        $prescriptions = $appointmentModel->getPrescriptionsByPatient($id);
+        
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'success', 'data' => $prescriptions]);
+        exit;
     }
 }

@@ -35,10 +35,10 @@
                         <?php if($data['isSuperAdmin']): ?>
                             <td><span class="small text-muted"><?php echo $p->branch_name; ?></span></td>
                         <?php endif; ?>
-                        <td class="fw-bold"><?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($p->total_invoiced ?? 0, 2); ?></td>
-                        <td class="text-success"><?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($p->total_paid ?? 0, 2); ?></td>
+                        <td class="fw-bold"><?php echo formatCurrency($p->total_invoiced ?? 0); ?></td>
+                        <td class="text-success"><?php echo formatCurrency($p->total_paid ?? 0); ?></td>
                         <td class="fw-bold <?php echo $balanceClass; ?> fs-5">
-                            <?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($balance, 2); ?>
+                            <?php echo formatCurrency($balance); ?>
                         </td>
                         <td class="text-end pe-4">
                             <a href="<?php echo BASE_URL; ?>/patient/ledger/<?php echo $p->id; ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3">

@@ -36,27 +36,58 @@ class Dashboard extends Controller {
     private function superAdminDashboard() {
         $branches = $this->branchModel->getAllBranches();
         $branchStats = [];
+        $revenuePerCountry = [];
+        $receivablePerCountry = [];
+        $payablePerCountry = [];
 
         foreach ($branches as $branch) {
+            // 1. Revenue & Receivables (Invoices)
             $invoices = $this->billingModel->getInvoicesByBranch($branch->id);
-            $revenue = 0;
+            $branchRevenue = 0;
+            $branchReceivable = 0;
             foreach ($invoices as $inv) {
-                if ($inv->status == 'Paid') $revenue += $inv->final_amount;
+                if ($inv->status == 'Paid') {
+                    $branchRevenue += $inv->final_amount;
+                } else {
+                    $branchReceivable += ($inv->final_amount - ($inv->paid_amount ?? 0));
+                }
             }
+
+            // 2. Payables (Staff Wallets)
+            $this->db->query("SELECT SUM(CASE WHEN type = 'Credit' THEN amount ELSE -amount END) as total 
+                              FROM wallet_transactions wt 
+                              JOIN users u ON wt.user_id = u.id 
+                              WHERE u.branch_id = :branch_id");
+            $this->db->bind(':branch_id', $branch->id);
+            $branchPayable = $this->db->single()->total ?? 0;
+
+            $country = $branch->country ?: 'India';
+            
+            if (!isset($revenuePerCountry[$country])) $revenuePerCountry[$country] = 0;
+            if (!isset($receivablePerCountry[$country])) $receivablePerCountry[$country] = 0;
+            if (!isset($payablePerCountry[$country])) $payablePerCountry[$country] = 0;
+
+            $revenuePerCountry[$country] += $branchRevenue;
+            $receivablePerCountry[$country] += $branchReceivable;
+            $payablePerCountry[$country] += $branchPayable;
 
             $branchStats[] = (object)[
                 'id' => $branch->id,
                 'name' => $branch->name,
-                'revenue' => $revenue,
-                'patient_count' => count($this->userModel->getStaffByBranch($branch->id)), // Placeholder for branch staff
-                'location' => $branch->country
+                'revenue' => $branchRevenue,
+                'receivable' => $branchReceivable,
+                'payable' => $branchPayable,
+                'patient_count' => count($this->userModel->getStaffByBranch($branch->id)),
+                'location' => $country
             ];
         }
 
         $data = [
             'title' => 'Global Dashboard - DenSmart',
             'branchStats' => $branchStats,
-            'totalGlobalRevenue' => array_sum(array_column($branchStats, 'revenue'))
+            'revenuePerCountry' => $revenuePerCountry,
+            'receivablePerCountry' => $receivablePerCountry,
+            'payablePerCountry' => $payablePerCountry
         ];
         $this->view('dashboard/super_admin', $data);
     }
@@ -95,7 +126,8 @@ class Dashboard extends Controller {
             'todayAppointments' => $todayAppointments,
             'newPatients' => $newPatients,
             'totalRevenue' => $totalRevenue,
-            'recentAppointments' => array_slice($todayAppointments, 0, 5) // Just show first 5 for now
+            'recentAppointments' => array_slice($todayAppointments, 0, 5), // Just show first 5 for now
+            'agingDebt' => $this->patientModel->getAgingDebtPatients(30)
         ];
         $this->view('dashboard/index', $data);
     }
@@ -112,11 +144,15 @@ class Dashboard extends Controller {
             // Reset to original (if any) or default
             $_SESSION['branch_id'] = 1; 
             $_SESSION['branch_name'] = 'DenSmart Central';
+            $_SESSION['branch_country'] = 'India';
+            $_SESSION['tax_pct'] = 18.00;
         } else {
             $branch = $this->branchModel->getBranchById($id);
             if ($branch) {
                 $_SESSION['branch_id'] = $branch->id;
                 $_SESSION['branch_name'] = $branch->name;
+                $_SESSION['branch_country'] = $branch->country;
+                $_SESSION['tax_pct'] = $branch->tax_pct;
                 $_SESSION['impersonating_branch'] = true;
             }
         }
@@ -162,7 +198,7 @@ class Dashboard extends Controller {
 
     public function printPrescription($id) {
         $prescription = $this->appointmentModel->getPrescription($id);
-        $this->db->query("SELECT a.*, p.name as patient_name, p.age, p.gender, u.name as doctor_name, b.name as branch_name, b.address, b.contact
+        $this->db->query("SELECT a.*, p.name as patient_name, p.age, p.gender, u.name as doctor_name, b.name as branch_name, b.address, b.contact, b.logo
                           FROM appointments a
                           JOIN patients p ON a.patient_id = p.id
                           JOIN users u ON a.user_id = u.id

@@ -61,7 +61,7 @@
                                 <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 rounded-pill">Inactive</span>
                             <?php endif; ?>
                         </td>
-                        <td class="fw-bold text-success"><?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($s->wallet_balance, 2); ?></td>
+                        <td class="fw-bold text-success"><?php echo formatCurrency($s->wallet_balance); ?></td>
                         <td class="text-end pe-4">
                             <div class="btn-group">
                                 <button class="btn btn-sm btn-outline-primary" onclick="openEditModal(<?php echo $s->id; ?>)">

@@ -7,6 +7,8 @@ class Billing extends Controller {
     private $userModel;
     private $serviceModel;
     private $walletModel;
+    private $inventoryModel;
+    private $branchModel;
 
     public function __construct() {
         $this->checkAuth();
@@ -15,6 +17,8 @@ class Billing extends Controller {
         $this->userModel = $this->model('User');
         $this->serviceModel = $this->model('ServiceModel');
         $this->walletModel = $this->model('WalletModel');
+        $this->inventoryModel = $this->model('InventoryModel');
+        $this->branchModel = $this->model('BranchModel');
     }
 
     public function index() {
@@ -67,6 +71,9 @@ class Billing extends Controller {
                         $db->bind(':price', $service['price']);
                         $db->bind(':total', $service['price']);
                         $db->execute();
+
+                        // Automated Stock Deduction
+                        $this->inventoryModel->deductStockForService($service['id']);
                     }
                 }
                 echo json_encode(['status' => 'success', 'message' => 'Invoice created', 'id' => $invoiceId]);
@@ -132,5 +139,23 @@ class Billing extends Controller {
         if ($invoice->nurse_id && $totalNurseComm > 0) {
             $this->walletModel->creditWallet($invoice->nurse_id, $totalNurseComm * $ratio, "Nurse Commission from Invoice #{$invoice->invoice_number}", $paymentId);
         }
+    }
+
+    public function printReceipt($id) {
+        $invoice = $this->billingModel->getInvoiceById($id);
+        if (!$invoice) die('Invoice not found');
+        
+        $db = new Database();
+        $db->query('SELECT ii.*, s.name as service_name FROM invoice_items ii JOIN services s ON ii.service_id = s.id WHERE ii.invoice_id = :id');
+        $db->bind(':id', $id);
+        $items = $db->resultSet();
+
+        $data = [
+            'title' => 'Print Receipt',
+            'invoice' => $invoice,
+            'items' => $items,
+            'branch' => $this->branchModel->getBranchById($invoice->branch_id)
+        ];
+        $this->view('billing/print_receipt', $data);
     }
 }

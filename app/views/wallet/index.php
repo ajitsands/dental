@@ -32,7 +32,7 @@
                             <td><span class="badge bg-primary-subtle text-primary border border-primary-subtle"><?php echo $s->branch_name; ?></span></td>
                         <?php endif; ?>
                         <td class="fw-bold text-success fs-5">
-                            <?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($s->wallet_balance, 2); ?>
+                            <?php echo formatCurrency($s->wallet_balance); ?>
                         </td>
                         <td class="text-end pe-4">
                             <button class="btn btn-sm btn-primary rounded-pill px-3 me-1" onclick="openPayoutModal(<?php echo $s->id; ?>, '<?php echo $s->name; ?>', <?php echo $s->wallet_balance; ?>)">
@@ -65,7 +65,7 @@
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Payout Amount</label>
                         <div class="input-group">
-                            <span class="input-group-text"><?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?></span>
+                            <span class="input-group-text"><?php echo getCurrencySymbol(); ?></span>
                             <input type="number" name="amount" id="payoutAmount" class="form-control form-control-lg" step="0.01" required>
                         </div>
                         <div class="form-text small">Max available: <span id="maxBalance"></span></div>

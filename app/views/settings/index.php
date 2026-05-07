@@ -46,18 +46,20 @@
                 <div class="card p-4 shadow-sm border-0">
                     <h4 class="fw-bold mb-4">Clinic Profile</h4>
                     <?php $b = $data['currentBranch']; ?>
-                    <form id="profileForm">
+                    <form id="profileForm" enctype="multipart/form-data">
                         <input type="hidden" name="id" value="<?php echo $b->id; ?>">
                         <div class="row g-3">
                             <div class="col-md-12 text-center mb-3">
-                                <div class="densmart-logo mx-auto mb-2" style="width: 80px; height: 80px; font-size: 2rem;">
+                                <div class="densmart-logo mx-auto mb-2" style="width: 100px; height: 100px; font-size: 2.5rem; overflow: hidden; border: 2px solid #e2e8f0;">
                                     <?php if($b->logo): ?>
-                                        <img src="<?php echo BASE_URL . $b->logo; ?>" class="rounded-circle w-100 h-100 object-fit-cover">
+                                        <img src="<?php echo BASE_URL . '/' . $b->logo; ?>" class="w-100 h-100 object-fit-cover" id="logoPreview">
                                     <?php else: ?>
-                                        <i class="fas fa-tooth"></i>
+                                        <i class="fas fa-tooth text-muted" id="logoIcon"></i>
+                                        <img src="" class="w-100 h-100 object-fit-cover d-none" id="logoPreview">
                                     <?php endif; ?>
                                 </div>
-                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3">Change Logo</button>
+                                <input type="file" name="logo" id="logoInput" class="d-none" accept="image/*" onchange="previewLogo(this)">
+                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="document.getElementById('logoInput').click()">Change Logo</button>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold">Clinic Name</label>
@@ -130,13 +132,6 @@
                     <h4 class="fw-bold mb-4">Tax & Billing Configuration</h4>
                     <form id="taxForm">
                         <input type="hidden" name="id" value="<?php echo $b->id; ?>">
-                        <!-- Hidden fields to maintain other branch data -->
-                        <input type="hidden" name="name" value="<?php echo $b->name; ?>">
-                        <input type="hidden" name="email" value="<?php echo $b->email; ?>">
-                        <input type="hidden" name="contact" value="<?php echo $b->contact; ?>">
-                        <input type="hidden" name="address" value="<?php echo $b->address; ?>">
-                        <input type="hidden" name="country" value="<?php echo $b->country; ?>">
-                        <input type="hidden" name="timezone" value="<?php echo $b->timezone; ?>">
 
                         <div class="mb-4">
                             <label class="form-label d-block small fw-bold uppercase text-muted">Tax System</label>
@@ -155,8 +150,8 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold">Standard Tax Rate (%)</label>
-                                <input type="number" class="form-control" value="18" readonly disabled>
-                                <div class="form-text small">Global rate is currently fixed at 18%</div>
+                                <input type="number" name="tax_pct" class="form-control" value="<?php echo $b->tax_pct; ?>" step="0.01" min="0">
+                                <div class="form-text small">Set to 0 to disable tax calculations in billing.</div>
                             </div>
                         </div>
                         <button type="button" class="btn btn-primary mt-4 px-5 rounded-pill shadow" id="saveTaxBtn" onclick="saveSettings('taxForm', 'saveTaxBtn')">Save Tax Settings</button>
@@ -170,28 +165,29 @@
                     <h4 class="fw-bold mb-4">Localization Settings</h4>
                     <form id="locForm">
                         <input type="hidden" name="id" value="<?php echo $b->id; ?>">
-                        <!-- Hidden fields to maintain other branch data -->
-                        <input type="hidden" name="name" value="<?php echo $b->name; ?>">
-                        <input type="hidden" name="email" value="<?php echo $b->email; ?>">
-                        <input type="hidden" name="contact" value="<?php echo $b->contact; ?>">
-                        <input type="hidden" name="address" value="<?php echo $b->address; ?>">
-                        <input type="hidden" name="tax_number" value="<?php echo $b->tax_number; ?>">
-                        <input type="hidden" name="tax_type" value="<?php echo $b->tax_type; ?>">
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold uppercase text-muted">Clinic Country</label>
-                            <select name="country" class="form-select">
+                            <select name="loc_country" class="form-select">
                                 <option value="India" <?php echo ($b->country == 'India') ? 'selected' : ''; ?>>India</option>
                                 <option value="Bahrain" <?php echo ($b->country == 'Bahrain') ? 'selected' : ''; ?>>Bahrain</option>
-                                <option value="UAE" <?php echo ($b->country == 'UAE') ? 'selected' : ''; ?>>UAE</option>
+                                <option value="Kuwait" <?php echo ($b->country == 'Kuwait') ? 'selected' : ''; ?>>Kuwait</option>
+                                <option value="Oman" <?php echo ($b->country == 'Oman') ? 'selected' : ''; ?>>Oman</option>
+                                <option value="Qatar" <?php echo ($b->country == 'Qatar') ? 'selected' : ''; ?>>Qatar</option>
                                 <option value="Saudi Arabia" <?php echo ($b->country == 'Saudi Arabia') ? 'selected' : ''; ?>>Saudi Arabia</option>
+                                <option value="UAE" <?php echo ($b->country == 'UAE') ? 'selected' : ''; ?>>UAE</option>
                             </select>
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-bold uppercase text-muted">Clinic Time Zone</label>
-                            <select name="timezone" class="form-select">
+                            <select name="loc_timezone" class="form-select">
                                 <option value="Asia/Kolkata" <?php echo ($b->timezone == 'Asia/Kolkata') ? 'selected' : ''; ?>>Asia/Kolkata (GMT+05:30) India</option>
                                 <option value="Asia/Bahrain" <?php echo ($b->timezone == 'Asia/Bahrain') ? 'selected' : ''; ?>>Asia/Bahrain (GMT+03:00) Bahrain</option>
+                                <option value="Asia/Kuwait" <?php echo ($b->timezone == 'Asia/Kuwait') ? 'selected' : ''; ?>>Asia/Kuwait (GMT+03:00) Kuwait</option>
+                                <option value="Asia/Muscat" <?php echo ($b->timezone == 'Asia/Muscat') ? 'selected' : ''; ?>>Asia/Muscat (GMT+04:00) Oman</option>
+                                <option value="Asia/Qatar" <?php echo ($b->timezone == 'Asia/Qatar') ? 'selected' : ''; ?>>Asia/Qatar (GMT+03:00) Qatar</option>
+                                <option value="Asia/Riyadh" <?php echo ($b->timezone == 'Asia/Riyadh') ? 'selected' : ''; ?>>Asia/Riyadh (GMT+03:00) Saudi Arabia</option>
+                                <option value="Asia/Dubai" <?php echo ($b->timezone == 'Asia/Dubai') ? 'selected' : ''; ?>>Asia/Dubai (GMT+04:00) UAE</option>
                             </select>
                         </div>
                         <button type="button" class="btn btn-primary mt-4 px-5 rounded-pill shadow" id="saveLocBtn" onclick="saveSettings('locForm', 'saveLocBtn')">Apply Localization</button>
@@ -228,11 +224,14 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Country</label>
-                            <select name="country" id="branchCountry" class="form-select">
+                            <select name="loc_country" id="branchCountry" class="form-select">
                                 <option value="India">India</option>
                                 <option value="Bahrain">Bahrain</option>
-                                <option value="UAE">UAE</option>
+                                <option value="Kuwait">Kuwait</option>
+                                <option value="Oman">Oman</option>
+                                <option value="Qatar">Qatar</option>
                                 <option value="Saudi Arabia">Saudi Arabia</option>
+                                <option value="UAE">UAE</option>
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -246,12 +245,21 @@
                             <label class="form-label">VAT/GST Number</label>
                             <input type="text" name="tax_number" id="branchTaxNumber" class="form-control">
                         </div>
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                             <label class="form-label">Timezone</label>
                             <select name="timezone" id="branchTimezone" class="form-select">
                                 <option value="Asia/Kolkata">Asia/Kolkata (GMT+5:30)</option>
                                 <option value="Asia/Bahrain">Asia/Bahrain (GMT+3:00)</option>
+                                <option value="Asia/Kuwait">Asia/Kuwait (GMT+3:00)</option>
+                                <option value="Asia/Muscat">Asia/Muscat (GMT+4:00)</option>
+                                <option value="Asia/Qatar">Asia/Qatar (GMT+3:00)</option>
+                                <option value="Asia/Riyadh">Asia/Riyadh (GMT+3:00)</option>
+                                <option value="Asia/Dubai">Asia/Dubai (GMT+4:00)</option>
                             </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tax Rate (%)</label>
+                            <input type="number" name="tax_pct" id="branchTaxPct" class="form-control" step="0.01" min="0" value="18.00">
                         </div>
                         <div class="col-md-12">
                             <label class="form-label">Address</label>
@@ -280,6 +288,23 @@ $(document).ready(function() {
         $(`button[data-bs-target="${activeTab}"]`).tab('show');
     }
 
+    // Auto-detect country based on timezone selection
+    $(document).on('change', 'select[name="timezone"], select[name="loc_timezone"]', function() {
+        const tz = $(this).val();
+        let country = 'India';
+        
+        if (tz.includes('Bahrain')) country = 'Bahrain';
+        else if (tz.includes('Kuwait')) country = 'Kuwait';
+        else if (tz.includes('Muscat')) country = 'Oman';
+        else if (tz.includes('Qatar')) country = 'Qatar';
+        else if (tz.includes('Riyadh')) country = 'Saudi Arabia';
+        else if (tz.includes('Dubai')) country = 'UAE';
+        
+        // Update both if they exist
+        $('select[name="loc_country"]').val(country);
+        $('#branchCountry').val(country);
+    });
+
     $('button[data-bs-toggle="pill"]').on('shown.bs.tab', function (e) {
         localStorage.setItem('activeSettingsTab', $(e.target).data('bs-target'));
     });
@@ -302,7 +327,9 @@ function saveSettings(formId, btnId) {
                 Swal.fire({
                     icon: 'success',
                     title: 'Settings Saved',
-                    text: 'Your clinic configuration has been updated successfully.'
+                    text: 'Your clinic configuration has been updated successfully. Received Country: ' + (response.debug_received_country || 'None')
+                }).then(() => {
+                    location.reload();
                 });
                 btn.prop('disabled', false).text(originalText);
             } else {
@@ -317,8 +344,20 @@ function saveSettings(formId, btnId) {
     });
 }
 
+function previewLogo(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            $('#logoPreview').attr('src', e.target.result).removeClass('d-none');
+            $('#logoIcon').addClass('d-none');
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
 function saveProfile() {
-    const formData = $('#profileForm').serialize();
+    const form = document.getElementById('profileForm');
+    const formData = new FormData(form);
     const btn = $('#saveProfileBtn');
     
     btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Saving...');
@@ -327,6 +366,8 @@ function saveProfile() {
         url: '<?php echo BASE_URL; ?>/settings/saveBranch',
         type: 'POST',
         data: formData,
+        processData: false,
+        contentType: false,
         dataType: 'json',
         success: function(response) {
             if(response.status === 'success') {
@@ -369,6 +410,7 @@ function openEditBranchModal(id) {
             $('#branchTaxType').val(data.tax_type);
             $('#branchTaxNumber').val(data.tax_number);
             $('#branchTimezone').val(data.timezone);
+            $('#branchTaxPct').val(data.tax_pct);
             $('#branchAddress').val(data.address);
             branchModal.show();
         } else {

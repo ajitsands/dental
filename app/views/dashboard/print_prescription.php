@@ -34,6 +34,9 @@
     </div>
 
     <div class="header">
+        <?php if($data['details']->logo): ?>
+            <img src="<?php echo BASE_URL . '/' . $data['details']->logo; ?>" style="max-width: 180px; max-height: 90px; margin-bottom: 15px;">
+        <?php endif; ?>
         <div class="clinic-name"><?php echo $data['details']->branch_name; ?></div>
         <div class="clinic-info"><?php echo $data['details']->address; ?> | Tel: <?php echo $data['details']->contact; ?></div>
     </div>

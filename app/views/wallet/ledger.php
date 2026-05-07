@@ -14,7 +14,7 @@
     <div class="col-md-4 text-end pt-3">
         <div class="card bg-success text-white border-0 shadow-sm p-3 d-inline-block" style="min-width: 200px; border-radius: 15px;">
             <div class="small fw-bold opacity-75 uppercase">Current Balance</div>
-            <div class="h3 fw-bold mb-0"><?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($data['user']->wallet_balance, 2); ?></div>
+            <div class="h3 fw-bold mb-0"><?php echo formatCurrency($data['user']->wallet_balance); ?></div>
         </div>
     </div>
 </div>
@@ -33,11 +33,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if(empty($data['ledger'])): ?>
-                        <tr>
-                            <td colspan="5" class="text-center py-5 text-muted">No transactions found for this user.</td>
-                        </tr>
-                    <?php else: ?>
                         <?php foreach($data['ledger'] as $t): ?>
                         <tr>
                             <td class="ps-4">
@@ -62,14 +57,13 @@
                                 <?php endif; ?>
                             </td>
                             <td class="fw-bold text-success">
-                                <?php echo ($t->type == 'Credit') ? (defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹') . ' ' . number_format($t->amount, 2) : '-'; ?>
+                                <?php echo ($t->type == 'Credit') ? formatCurrency($t->amount) : '-'; ?>
                             </td>
                             <td class="fw-bold text-danger">
-                                <?php echo ($t->type == 'Debit') ? (defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹') . ' ' . number_format($t->amount, 2) : '-'; ?>
+                                <?php echo ($t->type == 'Debit') ? formatCurrency($t->amount) : '-'; ?>
                             </td>
                         </tr>
                         <?php endforeach; ?>
-                    <?php endif; ?>
                 </tbody>
                 <tfoot class="table-light fw-bold border-top-2">
                     <?php 
@@ -87,7 +81,7 @@
                     </tr>
                     <tr class="table-primary border-top">
                         <td colspan="4" class="ps-4 text-end fs-5">NET PAYABLE BALANCE:</td>
-                        <td class="text-primary fs-4"><?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($netBalance, 2); ?></td>
+                        <td class="text-primary fs-4"><?php echo formatCurrency($netBalance); ?></td>
                     </tr>
                 </tfoot>
             </table>

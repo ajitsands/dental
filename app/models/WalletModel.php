@@ -62,4 +62,31 @@ class WalletModel extends Model {
             return false;
         }
     }
+
+    public function creditWallet($userId, $amount, $description, $referenceId = null) {
+        try {
+            $this->db->beginTransaction();
+
+            // 1. Record Credit Transaction
+            $this->db->query('INSERT INTO wallet_transactions (user_id, amount, type, description, reference_id) 
+                              VALUES (:user_id, :amount, "Credit", :description, :ref)');
+            $this->db->bind(':user_id', $userId);
+            $this->db->bind(':amount', $amount);
+            $this->db->bind(':description', $description);
+            $this->db->bind(':ref', $referenceId);
+            $this->db->execute();
+
+            // 2. Update User Balance
+            $this->db->query('UPDATE users SET wallet_balance = wallet_balance + :amount WHERE id = :user_id');
+            $this->db->bind(':user_id', $userId);
+            $this->db->bind(':amount', $amount);
+            $this->db->execute();
+
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return false;
+        }
+    }
 }

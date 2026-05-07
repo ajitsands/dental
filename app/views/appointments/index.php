@@ -13,8 +13,8 @@ $weekRangeText = date('M d', $startOfWeek) . ' - ' . date('M d', strtotime('+5 d
 
 <div class="row mb-4">
     <div class="col-md-8">
-        <h2 class="mb-1">Appointments & Scheduling</h2>
-        <p class="text-muted">Manage your clinic chairs and doctor schedules for <strong><?php echo $_SESSION['branch_name'] ?? 'Main Clinic'; ?></strong></p>
+        <h2 class="mb-1"><?php echo __('appointments_scheduling'); ?></h2>
+        <p class="text-muted"><?php echo __('manage_bookings'); ?> <strong><?php echo $_SESSION['branch_name'] ?? 'Main Clinic'; ?></strong></p>
     </div>
     <div class="col-md-4 text-end">
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bookingModal"><i class="fas fa-calendar-plus me-1"></i> Book Appointment</button>
@@ -22,7 +22,7 @@ $weekRangeText = date('M d', $startOfWeek) . ' - ' . date('M d', strtotime('+5 d
 </div>
 
 <div class="card">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center py-3">
         <div class="btn-group" id="view-toggle">
             <button class="btn btn-outline-secondary btn-sm">Day</button>
             <button class="btn btn-primary btn-sm">Week</button>
@@ -38,7 +38,7 @@ $weekRangeText = date('M d', $startOfWeek) . ' - ' . date('M d', strtotime('+5 d
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-bordered mb-0 text-center" style="min-width: 800px;">
-                <thead class="table-light">
+                <thead>
                     <tr>
                         <th style="width: 100px;">Time</th>
                         <?php foreach($weekDates as $day) echo "<th>$day</th>"; ?>
@@ -46,11 +46,15 @@ $weekRangeText = date('M d', $startOfWeek) . ' - ' . date('M d', strtotime('+5 d
                 </thead>
                 <tbody>
                     <?php 
-                    $times = ['09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '02:00 PM', '03:00 PM', '04:00 PM'];
+                    $times = [
+                        '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', 
+                        '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM', 
+                        '05:00 PM', '06:00 PM', '07:00 PM', '08:00 PM', '09:00 PM'
+                    ];
                     foreach($times as $time):
                     ?>
                     <tr>
-                        <td class="table-light fw-bold small"><?php echo $time; ?></td>
+                        <td class="fw-bold small" style="background-color: var(--sidebar-active);"> <?php echo $time; ?></td>
                         <?php foreach($weekDates as $day): ?>
                         <td style="min-height: 80px; vertical-align: top; padding: 5px;">
                             <?php 
@@ -59,13 +63,19 @@ $weekRangeText = date('M d', $startOfWeek) . ' - ' . date('M d', strtotime('+5 d
                                 $appDay = date('D d', strtotime($app->start_time));
                                 if($appTime == $time && $appDay == $day):
                             ?>
-                            <div class="badge bg-primary w-100 p-2 text-start mb-1 shadow-sm" style="white-space: normal;">
-                                <div class="fw-bold"><?php echo $app->patient_name; ?></div>
-                                <div class="small opacity-75"><?php echo $app->notes; ?></div>
-                                <div class="mt-1" style="font-size: 9px;">
-                                    <i class="fas fa-chair me-1"></i> Chair <?php echo $app->chair_id; ?>
-                                </div>
-                            </div>
+                            <div class="appointment-card badge bg-primary w-100 p-2 text-start mb-1 shadow-sm" 
+                                 onclick="manageAppointment(<?php echo $app->id; ?>, '<?php echo addslashes($app->patient_name); ?>', '<?php echo date('H:i A', strtotime($app->start_time)); ?>')"
+                                 style="white-space: normal; cursor: pointer; transition: transform 0.2s;">
+                                 <div class="fw-bold d-flex justify-content-between">
+                                     <span><?php echo $app->patient_name; ?></span>
+                                     <i class="fas fa-ellipsis-v small opacity-50"></i>
+                                 </div>
+                                 <div class="small opacity-75"><?php echo $app->notes; ?></div>
+                                 <div class="mt-1 d-flex justify-content-between align-items-center" style="font-size: 9px;">
+                                     <span><i class="fas fa-chair me-1"></i> Chair <?php echo $app->chair_id; ?></span>
+                                     <span><?php echo date('H:i', strtotime($app->start_time)) . '-' . date('H:i', strtotime($app->end_time)); ?></span>
+                                 </div>
+                             </div>
                             <?php 
                                 endif;
                             endforeach; 
@@ -150,7 +160,27 @@ $weekRangeText = date('M d', $startOfWeek) . ' - ' . date('M d', strtotime('+5 d
     </div>
 </div>
 
+<!-- Manage Appointment Modal -->
+<div class="modal fade" id="manageModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Manage Appointment</h5></div>
+            <div class="modal-body text-center">
+                <input type="hidden" id="manageAppId">
+                <h6 id="managePatientName"></h6>
+                <p class="text-muted" id="manageAppTime"></p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" onclick="extendAppointment()">Extend 30m</button>
+                    <button class="btn btn-danger" onclick="cancelAppointment()">Cancel Appointment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+let manageModal;
+
 $(document).ready(function() {
     $('.select2-patient').select2({
         theme: 'bootstrap-5',
@@ -159,6 +189,11 @@ $(document).ready(function() {
         allowClear: true,
         width: '100%'
     });
+
+    // Initialize manage modal after scripts load
+    if (document.getElementById('manageModal')) {
+        manageModal = new bootstrap.Modal(document.getElementById('manageModal'));
+    }
 });
 
 function confirmBooking() {
@@ -199,6 +234,53 @@ function confirmBooking() {
                 text: 'Something went wrong on the server.'
             });
             btn.prop('disabled', false).text('Confirm Appointment');
+        }
+    });
+}
+
+function manageAppointment(id, name, time) {
+    if(!manageModal) manageModal = new bootstrap.Modal(document.getElementById('manageModal'));
+    
+    $('#manageAppId').val(id);
+    $('#managePatientName').text(name);
+    $('#manageAppTime').text(time);
+    manageModal.show();
+}
+
+function extendAppointment() {
+    const id = $('#manageAppId').val();
+    $.post('<?php echo BASE_URL; ?>/appointment/extend/' + id, function(response) {
+        if(response.status === 'success') {
+            Swal.fire({ icon: 'success', title: 'Extended', text: response.message, timer: 1500 }).then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire('Error', response.message, 'error');
+        }
+    }, 'json');
+}
+
+function cancelAppointment() {
+    const id = $('#manageAppId').val();
+    Swal.fire({
+        title: 'Cancel Appointment?',
+        text: "This will remove the appointment from the schedule.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Yes, Cancel it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post('<?php echo BASE_URL; ?>/appointment/cancel/' + id, function(response) {
+                if(response.status === 'success') {
+                    Swal.fire({ icon: 'success', title: 'Cancelled', text: response.message, timer: 1500 }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Error', response.message, 'error');
+                }
+            }, 'json');
         }
     });
 }

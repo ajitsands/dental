@@ -53,6 +53,9 @@
                                 <a href="<?php echo BASE_URL; ?>/patient/details/<?php echo $p->id; ?>" class="btn btn-sm btn-outline-primary" title="View History">
                                     <i class="fas fa-history"></i> History
                                 </a>
+                                <button onclick="viewPrescriptions(<?php echo $p->id; ?>, '<?php echo addslashes($p->name); ?>')" class="btn btn-sm btn-outline-success" title="Print Prescription">
+                                    <i class="fas fa-file-prescription"></i> Rx
+                                </button>
                                 <a href="<?php echo BASE_URL; ?>/patient/chart/<?php echo $p->id; ?>" class="btn btn-sm btn-outline-info" title="Dental Chart">
                                     <i class="fas fa-tooth"></i> Chart
                                 </a>
@@ -66,13 +69,73 @@
     </div>
 </div>
 
+<!-- Prescription Modal -->
+<div class="modal fade" id="rxModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fas fa-file-prescription me-2"></i> Prescriptions for <span id="rxPatientName"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="rxList" class="list-group list-group-flush">
+                    <!-- Loaded via AJAX -->
+                </div>
+                <div id="rxEmpty" class="p-5 text-center d-none">
+                    <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No prescriptions found for this patient.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+let rxModal;
+
 $(document).ready(function() {
     $('#patientTable').DataTable({
         "pageLength": 10,
         "language": { "search": "", "searchPlaceholder": "Search by name, ID or phone..." }
     });
+
+    // Initialize modal after everything is loaded
+    rxModal = new bootstrap.Modal(document.getElementById('rxModal'));
 });
+
+function viewPrescriptions(id, name) {
+    if(!rxModal) rxModal = new bootstrap.Modal(document.getElementById('rxModal'));
+    
+    $('#rxPatientName').text(name);
+    $('#rxList').html('<div class="p-4 text-center"><span class="spinner-border text-success"></span> Loading...</div>');
+    $('#rxEmpty').addClass('d-none');
+    rxModal.show();
+
+    $.get('<?php echo BASE_URL; ?>/patient/getPrescriptions/' + id, function(response) {
+        if(response.status === 'success' && response.data.length > 0) {
+            let html = '';
+            response.data.forEach(rx => {
+                const date = new Date(rx.start_time).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                html += `
+                    <div class="list-group-item p-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold mb-1">Prescription - ${date}</div>
+                            <div class="small text-muted">By Dr. ${rx.doctor_name}</div>
+                            <div class="mt-1 small text-truncate" style="max-width: 400px;">${rx.medicines}</div>
+                        </div>
+                        <a href="<?php echo BASE_URL; ?>/dashboard/printPrescription/${rx.appointment_id}" target="_blank" class="btn btn-primary btn-sm rounded-pill px-3">
+                            <i class="fas fa-print me-1"></i> Print
+                        </a>
+                    </div>
+                `;
+            });
+            $('#rxList').html(html);
+        } else {
+            $('#rxList').empty();
+            $('#rxEmpty').removeClass('d-none');
+        }
+    }, 'json');
+}
 </script>
 
 <?php require_once APPROOT . '/app/views/layouts/footer.php'; ?>

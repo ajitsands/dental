@@ -111,4 +111,34 @@ class PatientModel extends Model {
         if ($branch_id) $this->db->bind(':branch_id', $branch_id);
         return $this->db->resultSet();
     }
+    public function getAgingDebtPatients($days = 30) {
+        // Find patients with unpaid or partially paid invoices older than $days
+        $this->db->query('SELECT p.name, p.unique_id, i.invoice_number, i.final_amount, i.created_at,
+                          (SELECT SUM(amount) FROM payments WHERE invoice_id = i.id) as paid_amount
+                          FROM invoices i
+                          JOIN patients p ON i.patient_id = p.id
+                          WHERE i.status != "Paid" 
+                          AND i.created_at < DATE_SUB(NOW(), INTERVAL :days DAY)
+                          AND i.branch_id = :branch');
+        $this->db->bind(':days', $days);
+        $this->db->bind(':branch', $_SESSION['branch_id'] ?? 1);
+        return $this->db->resultSet();
+    }
+    public function saveDentalChart($patientId, $toothNumber, $condition, $notes, $surfaces = '') {
+        $this->db->query('INSERT INTO dental_charts (patient_id, tooth_number, condition_name, notes, surfaces) 
+                          VALUES (:patient_id, :tooth_number, :condition, :notes, :surfaces)
+                          ON DUPLICATE KEY UPDATE condition_name = :condition, notes = :notes, surfaces = :surfaces');
+        $this->db->bind(':patient_id', $patientId);
+        $this->db->bind(':tooth_number', $toothNumber);
+        $this->db->bind(':condition', $condition);
+        $this->db->bind(':notes', $notes);
+        $this->db->bind(':surfaces', $surfaces);
+        return $this->db->execute();
+    }
+
+    public function getDentalChart($patientId) {
+        $this->db->query('SELECT * FROM dental_charts WHERE patient_id = :id');
+        $this->db->bind(':id', $patientId);
+        return $this->db->resultSet();
+    }
 }

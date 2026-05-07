@@ -72,7 +72,7 @@ class User extends Model {
         $this->db->query('SELECT u.*, r.name as role_name 
                           FROM users u 
                           JOIN roles r ON u.role_id = r.id 
-                          WHERE u.branch_id = :branch_id AND u.role_id != 3
+                          WHERE u.branch_id = :branch_id AND u.role_id != 3 AND u.role_id != 6
                           ORDER BY u.name ASC');
         $this->db->bind(':branch_id', $branch_id);
         return $this->db->resultSet();

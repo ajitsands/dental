@@ -22,7 +22,7 @@
         ?>
         <div class="card <?php echo $balance > 0 ? 'bg-danger' : 'bg-success'; ?> text-white border-0 shadow-sm p-3 d-inline-block" style="min-width: 250px; border-radius: 15px;">
             <div class="small fw-bold opacity-75 uppercase">Total Outstanding</div>
-            <div class="h3 fw-bold mb-0"><?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($balance, 2); ?></div>
+            <div class="h3 fw-bold mb-0"><?php echo formatCurrency($balance); ?></div>
         </div>
     </div>
 </div>
@@ -63,10 +63,10 @@
                                 <?php endif; ?>
                             </div>
                         </td>
-                        <td class="text-danger fw-bold"><?php echo ($t->type == 'Invoice') ? number_format($t->amount, 2) : '-'; ?></td>
-                        <td class="text-success fw-bold"><?php echo ($t->type == 'Payment') ? number_format($t->amount, 2) : '-'; ?></td>
+                        <td class="text-danger fw-bold"><?php echo ($t->type == 'Invoice') ? formatCurrency($t->amount) : '-'; ?></td>
+                        <td class="text-success fw-bold"><?php echo ($t->type == 'Payment') ? formatCurrency($t->amount) : '-'; ?></td>
                         <td class="pe-4 text-end fw-bold <?php echo ($runningBalance > 0) ? 'text-danger' : 'text-success'; ?>">
-                            <?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($runningBalance, 2); ?>
+                            <?php echo formatCurrency($runningBalance); ?>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -74,15 +74,15 @@
                 <tfoot class="table-light fw-bold border-top-2">
                     <tr>
                         <td colspan="4" class="ps-4 text-end">TOTAL CHARGES (Debits):</td>
-                        <td class="pe-4 text-end text-danger fs-5"><?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($totalInvoiced, 2); ?></td>
+                        <td class="pe-4 text-end text-danger fs-5"><?php echo formatCurrency($totalInvoiced); ?></td>
                     </tr>
                     <tr>
                         <td colspan="4" class="ps-4 text-end">TOTAL PAYMENTS (Credits):</td>
-                        <td class="pe-4 text-end text-success fs-5"><?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($totalPaid, 2); ?></td>
+                        <td class="pe-4 text-end text-success fs-5"><?php echo formatCurrency($totalPaid); ?></td>
                     </tr>
                     <tr class="table-dark">
                         <td colspan="4" class="ps-4 text-end fs-5 text-white">NET OUTSTANDING BALANCE:</td>
-                        <td class="pe-4 text-end fs-4 text-warning"><?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($balance, 2); ?></td>
+                        <td class="pe-4 text-end fs-4 text-warning"><?php echo formatCurrency($balance); ?></td>
                     </tr>
                 </tfoot>
             </table>

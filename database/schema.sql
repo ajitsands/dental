@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS branches (
     country VARCHAR(100),
     timezone VARCHAR(100) DEFAULT 'Asia/Kolkata',
     tax_type ENUM('GST', 'VAT') DEFAULT 'GST',
+    tax_pct DECIMAL(5, 2) DEFAULT 18.00,
     commission_model ENUM('service', 'individual') DEFAULT 'service',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

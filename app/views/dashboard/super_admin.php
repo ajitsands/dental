@@ -10,20 +10,34 @@
     <div class="row g-4 mb-5">
         <div class="col-md-4">
             <div class="card border-0 shadow-sm p-4 text-center h-100" style="border-radius: 20px; background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color: white;">
-                <div class="small fw-bold opacity-75 mb-2 uppercase">Global Revenue</div>
-                <div class="h2 fw-bold mb-0"><?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($data['totalGlobalRevenue'], 2); ?></div>
+                <div class="small fw-bold opacity-75 mb-2 uppercase">Global Revenue (By Region)</div>
+                <div class="h6 fw-bold mb-0">
+                    <?php 
+                    foreach($data['revenuePerCountry'] as $country => $rev) {
+                        echo '<div class="mb-1">' . formatCurrency($rev, $country) . '</div>';
+                    }
+                    ?>
+                </div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card border-0 shadow-sm p-4 text-center h-100" style="border-radius: 20px; background: #1e293b; color: white;">
-                <div class="small fw-bold opacity-75 mb-2 uppercase">Total Clinics</div>
-                <div class="h2 fw-bold mb-0"><?php echo count($data['branchStats']); ?></div>
+                <div class="small fw-bold opacity-75 mb-2 uppercase">Total Payable (By Region)</div>
+                <div class="h6 fw-bold mb-0">
+                    <?php foreach($data['payablePerCountry'] as $country => $amt): ?>
+                        <div class="mb-1 text-warning"><?php echo formatCurrency($amt, $country); ?></div>
+                    <?php endforeach; ?>
+                </div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card border-0 shadow-sm p-4 text-center h-100" style="border-radius: 20px; border: 2px dashed #cbd5e1; background: #f8fafc;">
-                <div class="small fw-bold text-muted mb-2 uppercase">Global Patients</div>
-                <div class="h2 fw-bold mb-0">Aggregate View</div>
+                <div class="small fw-bold text-muted mb-2 uppercase">Pending Receivable (By Region)</div>
+                <div class="h6 fw-bold mb-0">
+                    <?php foreach($data['receivablePerCountry'] as $country => $amt): ?>
+                        <div class="mb-1 text-danger"><?php echo formatCurrency($amt, $country); ?></div>
+                    <?php endforeach; ?>
+                </div>
             </div>
         </div>
     </div>
@@ -40,14 +54,18 @@
                 <h5 class="fw-bold mb-1"><?php echo $bs->name; ?></h5>
                 <p class="text-muted small mb-3"><i class="fas fa-map-marker-alt me-1"></i> <?php echo $bs->location; ?></p>
                 
-                <div class="d-flex justify-content-between mb-3 px-2">
-                    <div class="text-start">
+                <div class="row g-2 mb-3 px-2">
+                    <div class="col-6 text-start border-end">
                         <div class="text-muted x-small">Revenue</div>
-                        <div class="fw-bold small"><?php echo defined('CURRENCY_SYMBOL') ? CURRENCY_SYMBOL : '₹'; ?> <?php echo number_format($bs->revenue, 0); ?></div>
+                        <div class="fw-bold small text-success"><?php echo formatCurrency($bs->revenue, $bs->location); ?></div>
                     </div>
-                    <div class="text-end">
-                        <div class="text-muted x-small">Staff</div>
-                        <div class="fw-bold small"><?php echo $bs->patient_count; ?></div>
+                    <div class="col-6 text-end">
+                        <div class="text-muted x-small">Pending</div>
+                        <div class="fw-bold small text-danger"><?php echo formatCurrency($bs->receivable, $bs->location); ?></div>
+                    </div>
+                    <div class="col-12 mt-2 pt-2 border-top">
+                        <div class="text-muted x-small">Payable (Staff)</div>
+                        <div class="fw-bold small text-warning"><?php echo formatCurrency($bs->payable, $bs->location); ?></div>
                     </div>
                 </div>
 

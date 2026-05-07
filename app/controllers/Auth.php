@@ -41,11 +41,15 @@ class Auth extends Controller {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['branch_id'] = $_POST['branch_id'];
             
-            // Get branch name for display
-            $this->db->query("SELECT name FROM branches WHERE id = :id");
+            // Get branch name, country and tax settings for display
+            $this->db->query("SELECT name, country, tax_pct, tax_type FROM branches WHERE id = :id");
             $this->db->bind(':id', $_POST['branch_id']);
             $branch = $this->db->single();
             $_SESSION['branch_name'] = $branch->name;
+            $_SESSION['branch_country'] = $branch->country;
+            $_SESSION['tax_pct'] = $branch->tax_pct;
+            $_SESSION['tax_type'] = (strtolower($branch->country) == 'india') ? 'GST' : 'VAT';
+            $_SESSION['branch_logo'] = $branch->logo;
 
             header('Location: ' . BASE_URL . '/dashboard');
             exit();
@@ -69,11 +73,15 @@ class Auth extends Controller {
         $_SESSION['role_id'] = $user->role_id;
         $_SESSION['branch_id'] = $user->branch_id;
         
-        // Get branch name
-        $this->db->query("SELECT name FROM branches WHERE id = :id");
+        // Get branch name, country and tax settings
+        $this->db->query("SELECT name, country, tax_pct, tax_type, logo FROM branches WHERE id = :id");
         $this->db->bind(':id', $user->branch_id);
         $branch = $this->db->single();
         $_SESSION['branch_name'] = $branch ? $branch->name : 'Global';
+        $_SESSION['branch_country'] = $branch ? $branch->country : 'India';
+        $_SESSION['tax_pct'] = $branch ? $branch->tax_pct : 18.00;
+        $_SESSION['tax_type'] = ($branch && strtolower($branch->country) == 'india') ? 'GST' : 'VAT';
+        $_SESSION['branch_logo'] = $branch ? $branch->logo : '';
 
         // Get role name
         $this->db->query("SELECT name FROM roles WHERE id = :id");

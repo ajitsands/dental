@@ -12,7 +12,7 @@ class AppointmentModel extends Model {
         $this->db->query('SELECT a.*, p.name as patient_name 
                           FROM appointments a 
                           JOIN patients p ON a.patient_id = p.id 
-                          WHERE a.branch_id = :branch_id
+                          WHERE a.branch_id = :branch_id AND a.status != "Cancelled"
                           ORDER BY a.start_time ASC');
         $this->db->bind(':branch_id', $branch_id);
         return $this->db->resultSet();
@@ -76,5 +76,28 @@ class AppointmentModel extends Model {
         $this->db->query('SELECT * FROM prescriptions WHERE appointment_id = :id');
         $this->db->bind(':id', $appointmentId);
         return $this->db->single();
+    }
+
+    public function getPrescriptionsByPatient($patientId) {
+        $this->db->query('SELECT p.*, a.start_time, u.name as doctor_name 
+                          FROM prescriptions p 
+                          JOIN appointments a ON p.appointment_id = a.id 
+                          JOIN users u ON p.doctor_id = u.id 
+                          WHERE p.patient_id = :id 
+                          ORDER BY a.start_time DESC');
+        $this->db->bind(':id', $patientId);
+        return $this->db->resultSet();
+    }
+    public function cancelAppointment($id) {
+        $this->db->query('UPDATE appointments SET status = "Cancelled" WHERE id = :id');
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
+
+    public function extendAppointment($id, $minutes = 30) {
+        $this->db->query('UPDATE appointments SET end_time = DATE_ADD(end_time, INTERVAL :mins MINUTE) WHERE id = :id');
+        $this->db->bind(':mins', $minutes);
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
     }
 }
