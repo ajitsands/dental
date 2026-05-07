@@ -20,12 +20,12 @@
             <table id="staffTable" class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">Staff Name</th>
-                        <?php if($data['isSuperAdmin']): ?><th>Branch</th><?php endif; ?>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th>Wallet Balance</th>
-                        <th class="text-end pe-4">Actions</th>
+                        <th class="ps-4"><?php echo __('staff_name'); ?></th>
+                        <?php if($data['isSuperAdmin']): ?><th><?php echo __('branch'); ?></th><?php endif; ?>
+                        <th><?php echo __('role'); ?></th>
+                        <th><?php echo __('status'); ?></th>
+                        <th><?php echo __('wallet_balance'); ?></th>
+                        <th class="text-end pe-4"><?php echo __('actions'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -163,7 +163,7 @@ $(document).ready(function() {
     staffModal = new bootstrap.Modal(document.getElementById('staffModal'));
     $('#staffTable').DataTable({
         "pageLength": 10,
-        "language": { "search": "", "searchPlaceholder": "Search staff..." }
+        "language": dtLanguage
     });
 });
 
@@ -240,6 +240,7 @@ function deleteStaff(id, name) {
         }
     });
 }
+
 </script>
 
 <?php require_once APPROOT . '/app/views/layouts/footer.php'; ?>

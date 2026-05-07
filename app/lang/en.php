@@ -96,6 +96,12 @@ return [
     'name' => 'Name',
     'contact' => 'Contact',
     'registered_at' => 'Registered At',
+    'service_name' => 'Service Name',
+    'standard_cost' => 'Standard Cost',
+    'staff_comm' => 'Staff Comm (%)',
+    'staff_name' => 'Staff Name',
+    'role' => 'Role',
+    'wallet_balance' => 'Wallet Balance',
     
     // Appointments
     'appointments_scheduling' => 'Appointments & Scheduling',

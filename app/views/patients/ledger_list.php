@@ -13,12 +13,12 @@
             <table class="table table-hover align-middle mb-0" id="customerLedgerTable">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">Patient Details</th>
-                        <?php if($data['isSuperAdmin']): ?><th>Origin Branch</th><?php endif; ?>
-                        <th>Total Invoiced</th>
-                        <th>Total Paid</th>
-                        <th>Outstanding Balance</th>
-                        <th class="text-end pe-4">Statement</th>
+                        <th class="ps-4"><?php echo __('patient'); ?></th>
+                        <?php if($data['isSuperAdmin']): ?><th>Branch</th><?php endif; ?>
+                        <th><?php echo __('total_revenue'); ?></th>
+                        <th><?php echo __('collected_amount'); ?></th>
+                        <th><?php echo __('outstanding_dues'); ?></th>
+                        <th class="text-end pe-4"><?php echo __('actions'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -57,7 +57,7 @@
 $(document).ready(function() {
     $('#customerLedgerTable').DataTable({
         "pageLength": 10,
-        "language": { "search": "", "searchPlaceholder": "Search by name or ID..." }
+        "language": dtLanguage
     });
 });
 </script>

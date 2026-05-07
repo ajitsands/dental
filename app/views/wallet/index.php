@@ -91,7 +91,7 @@ $(document).ready(function() {
     payoutModal = new bootstrap.Modal(document.getElementById('payoutModal'));
     $('#walletTable').DataTable({
         "pageLength": 10,
-        "language": { "search": "", "searchPlaceholder": "Search staff..." }
+        "language": dtLanguage
     });
 });
 

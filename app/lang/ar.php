@@ -96,6 +96,12 @@ return [
     'name' => 'الاسم',
     'contact' => 'الاتصال',
     'registered_at' => 'تاريخ التسجيل',
+    'service_name' => 'اسم الخدمة',
+    'standard_cost' => 'التكلفة القياسية',
+    'staff_comm' => 'عمولة الموظفين',
+    'staff_name' => 'اسم الموظف',
+    'role' => 'الدور',
+    'wallet_balance' => 'رصيد المحفظة',
     
     // Appointments
     'appointments_scheduling' => 'المواعيد والجدولة',

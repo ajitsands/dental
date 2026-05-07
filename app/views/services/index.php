@@ -18,11 +18,11 @@
             <table class="table table-hover align-middle mb-0" id="serviceTable">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">Service Name</th>
-                        <th>Standard Cost</th>
-                        <th>Staff Comm (%)</th>
-                        <th>Status</th>
-                        <th class="text-end pe-4">Actions</th>
+                        <th class="ps-4"><?php echo __('service_name'); ?></th>
+                        <th><?php echo __('standard_cost'); ?></th>
+                        <th><?php echo __('staff_comm'); ?></th>
+                        <th><?php echo __('status'); ?></th>
+                        <th class="text-end pe-4"><?php echo __('actions'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -229,6 +229,12 @@ function deleteService(id) {
         }
     });
 }
+$(document).ready(function() {
+    $('#serviceTable').DataTable({
+        "pageLength": 10,
+        "language": dtLanguage
+    });
+});
 </script>
 
 <?php require_once APPROOT . '/app/views/layouts/footer.php'; ?>
