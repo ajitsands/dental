@@ -2,8 +2,8 @@
 
 <div class="row mb-4">
     <div class="col-md-8">
-        <h2 class="mb-1">Customer Ledgers</h2>
-        <p class="text-muted">Monitor outstanding balances and payment history across your patient base.</p>
+        <h2 class="mb-1"><?php echo __('customer_ledger'); ?></h2>
+        <p class="text-muted"><?php echo __('manage_patient_credits'); ?></p>
     </div>
 </div>
 

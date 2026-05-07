@@ -92,6 +92,10 @@ return [
     'last_updated' => 'Last Updated',
     'no_conditions' => 'No conditions recorded yet.',
     'no_notes' => 'No notes',
+    'patient_id' => 'Patient ID',
+    'name' => 'Name',
+    'contact' => 'Contact',
+    'registered_at' => 'Registered At',
     
     // Appointments
     'appointments_scheduling' => 'Appointments & Scheduling',

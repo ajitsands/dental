@@ -92,6 +92,10 @@ return [
     'last_updated' => 'آخر تحديث',
     'no_conditions' => 'لا توجد حالات مسجلة بعد.',
     'no_notes' => 'لا توجد ملاحظات',
+    'patient_id' => 'معرف المريض',
+    'name' => 'الاسم',
+    'contact' => 'الاتصال',
+    'registered_at' => 'تاريخ التسجيل',
     
     // Appointments
     'appointments_scheduling' => 'المواعيد والجدولة',

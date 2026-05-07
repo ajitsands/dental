@@ -2,8 +2,8 @@
 
 <div class="row mb-4">
     <div class="col-md-8">
-        <h2 class="mb-1">Staff Wallets</h2>
-        <p class="text-muted">Manage commissions, payouts, and financial records for your team.</p>
+        <h2 class="mb-1"><?php echo __('staff_wallet'); ?></h2>
+        <p class="text-muted"><?php echo __('track_commissions'); ?></p>
     </div>
 </div>
 

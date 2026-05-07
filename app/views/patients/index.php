@@ -2,8 +2,8 @@
 
 <div class="row mb-4">
     <div class="col-md-8">
-        <h2 class="mb-1">Global Patient Registry</h2>
-        <p class="text-muted">Access patient records and history across all clinic branches.</p>
+        <h2 class="mb-1"><?php echo __('global_patient_registry'); ?></h2>
+        <p class="text-muted"><?php echo __('manage_all_patients'); ?></p>
     </div>
     <div class="col-md-4 text-end">
         <a href="<?php echo BASE_URL; ?>/patient/register" class="btn btn-primary rounded-pill px-4 shadow-sm">
@@ -18,12 +18,12 @@
             <table class="table table-hover align-middle mb-0" id="patientTable">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">Patient ID</th>
-                        <th>Name</th>
-                        <th>Contact</th>
-                        <th>Registered At</th>
-                        <th>Status</th>
-                        <th class="text-end pe-4">Actions</th>
+                        <th class="ps-4"><?php echo __('patient_id'); ?></th>
+                        <th><?php echo __('name'); ?></th>
+                        <th><?php echo __('contact'); ?></th>
+                        <th><?php echo __('registered_at'); ?></th>
+                        <th><?php echo __('status'); ?></th>
+                        <th class="text-end pe-4"><?php echo __('actions'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -96,7 +96,7 @@ let rxModal;
 $(document).ready(function() {
     $('#patientTable').DataTable({
         "pageLength": 10,
-        "language": { "search": "", "searchPlaceholder": "Search by name, ID or phone..." }
+        "language": dtLanguage
     });
 
     // Initialize modal after everything is loaded

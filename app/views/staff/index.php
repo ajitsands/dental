@@ -2,11 +2,11 @@
 
 <div class="row mb-4">
     <div class="col-md-8">
-        <h2 class="mb-1">Staff Management</h2>
+        <h2 class="mb-1"><?php echo __('staff_management'); ?></h2>
         <?php if($data['isSuperAdmin']): ?>
             <p class="text-muted"><span class="badge bg-danger">Super Admin Access</span> Managing all clinic branches</p>
         <?php else: ?>
-            <p class="text-muted">Manage your doctors, technicians, and nursing staff for <strong><?php echo $_SESSION['branch_name'] ?? 'Main Clinic'; ?></strong></p>
+            <p class="text-muted"><?php echo __('manage_clinic_team'); ?> <strong><?php echo $_SESSION['branch_name'] ?? 'Main Clinic'; ?></strong></p>
         <?php endif; ?>
     </div>
     <div class="col-md-4 text-end">
