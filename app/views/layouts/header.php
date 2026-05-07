@@ -13,6 +13,8 @@
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
     <!-- Custom CSS -->
     <style>
         :root {
@@ -139,6 +141,21 @@
                     <li class="nav-item">
                         <a class="nav-link" href="<?php echo BASE_URL; ?>/inventory"><i class="fas fa-boxes me-1"></i> Inventory</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo BASE_URL; ?>/service"><i class="fas fa-concierge-bell me-1"></i> Services</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo BASE_URL; ?>/staff"><i class="fas fa-user-md me-1"></i> Staff</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="finDropdown" data-bs-toggle="dropdown">
+                            <i class="fas fa-wallet me-1"></i> Financials
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="<?php echo BASE_URL; ?>/patient/ledger"><i class="fas fa-address-book me-2"></i> Customer Ledgers</a></li>
+                            <li><a class="dropdown-item" href="<?php echo BASE_URL; ?>/wallet"><i class="fas fa-users-cog me-2"></i> Staff Wallets</a></li>
+                        </ul>
+                    </li>
                 </ul>
                 <div class="d-flex align-items-center">
                     <div class="dropdown me-3">
@@ -150,6 +167,12 @@
                             <li><a class="dropdown-item" href="#">Arabic (العربية)</a></li>
                         </ul>
                     </div>
+                    <?php if (isset($_SESSION['impersonating_branch'])): ?>
+                        <div class="alert alert-warning py-1 px-3 mb-0 me-3 d-flex align-items-center rounded-pill border-0" style="font-size: 0.85rem;">
+                            <i class="fas fa-eye me-2"></i> Viewing: <strong><?php echo $_SESSION['branch_name']; ?></strong>
+                            <a href="<?php echo BASE_URL; ?>/dashboard/switchBranch/global" class="btn btn-xs btn-dark ms-2 rounded-pill py-0 px-2" style="font-size: 0.75rem;">Back to Global</a>
+                        </div>
+                    <?php endif; ?>
                     <div class="dropdown">
                         <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark" data-bs-toggle="dropdown">
                             <img src="https://ui-avatars.com/api/?name=Dr+John&background=0d6efd&color=fff" alt="user" width="32" height="32" class="rounded-circle me-2">

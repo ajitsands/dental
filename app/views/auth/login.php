@@ -113,7 +113,7 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(response) {
                 if(response.status === 'success') {
-                    window.location.href = '<?php echo BASE_URL; ?>/auth/selectBranch';
+                    window.location.href = '<?php echo BASE_URL; ?>/dashboard';
                 } else {
                     Swal.fire({
                         icon: 'error',

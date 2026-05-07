@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS branches (
     country VARCHAR(100),
     timezone VARCHAR(100) DEFAULT 'Asia/Kolkata',
     tax_type ENUM('GST', 'VAT') DEFAULT 'GST',
+    commission_model ENUM('service', 'individual') DEFAULT 'service',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -27,7 +28,7 @@ CREATE TABLE IF NOT EXISTS roles (
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
-INSERT IGNORE INTO roles (id, name) VALUES (1, 'Admin'), (2, 'Dentist'), (3, 'Receptionist');
+INSERT IGNORE INTO roles (id, name) VALUES (1, 'Admin'), (2, 'Dentist'), (3, 'Receptionist'), (4, 'Technician'), (5, 'Nurse');
 
 -- Users
 CREATE TABLE IF NOT EXISTS users (
@@ -39,6 +40,8 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     phone VARCHAR(20),
     status ENUM('active', 'inactive') DEFAULT 'active',
+    commission_pct DECIMAL(5, 2) DEFAULT 0,
+    wallet_balance DECIMAL(10, 2) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (branch_id) REFERENCES branches(id),
     FOREIGN KEY (role_id) REFERENCES roles(id)
@@ -55,9 +58,9 @@ CREATE TABLE IF NOT EXISTS patients (
     contact VARCHAR(20),
     email VARCHAR(100),
     photo VARCHAR(255),
-    medical_history TEXT, -- diabetes, allergies, medications
+    medical_history TEXT,
     dental_history TEXT,
-    medical_alerts TEXT, -- diabetes, BP
+    medical_alerts TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (branch_id) REFERENCES branches(id)
 );
@@ -86,12 +89,12 @@ CREATE TABLE IF NOT EXISTS appointments (
     FOREIGN KEY (chair_id) REFERENCES chairs(id)
 );
 
--- Tooth Chart (Odontogram)
+-- Tooth Chart
 CREATE TABLE IF NOT EXISTS tooth_chart (
     id INT AUTO_INCREMENT PRIMARY KEY,
     patient_id INT,
-    tooth_number INT NOT NULL, -- 1-32 or ISO 11-48
-    condition_name VARCHAR(100), -- Cavity, Filling, Extraction, Crown
+    tooth_number INT NOT NULL,
+    condition_name VARCHAR(100),
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (patient_id) REFERENCES patients(id)
@@ -108,26 +111,14 @@ CREATE TABLE IF NOT EXISTS treatment_plans (
     FOREIGN KEY (patient_id) REFERENCES patients(id)
 );
 
--- Procedures & Visits
-CREATE TABLE IF NOT EXISTS procedures (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    treatment_plan_id INT,
-    appointment_id INT,
-    description TEXT,
-    cost DECIMAL(10, 2),
-    notes TEXT,
-    before_image VARCHAR(255),
-    after_image VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (treatment_plan_id) REFERENCES treatment_plans(id),
-    FOREIGN KEY (appointment_id) REFERENCES appointments(id)
-);
-
 -- Invoices
 CREATE TABLE IF NOT EXISTS invoices (
     id INT AUTO_INCREMENT PRIMARY KEY,
     branch_id INT,
     patient_id INT,
+    doctor_id INT,
+    technician_id INT,
+    nurse_id INT,
     invoice_number VARCHAR(50) NOT NULL UNIQUE,
     total_amount DECIMAL(10, 2),
     discount DECIMAL(10, 2) DEFAULT 0,
@@ -136,7 +127,36 @@ CREATE TABLE IF NOT EXISTS invoices (
     status ENUM('Unpaid', 'Partially Paid', 'Paid') DEFAULT 'Unpaid',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (branch_id) REFERENCES branches(id),
-    FOREIGN KEY (patient_id) REFERENCES patients(id)
+    FOREIGN KEY (patient_id) REFERENCES patients(id),
+    FOREIGN KEY (doctor_id) REFERENCES users(id),
+    FOREIGN KEY (technician_id) REFERENCES users(id),
+    FOREIGN KEY (nurse_id) REFERENCES users(id)
+);
+
+-- Services & Procedures
+CREATE TABLE IF NOT EXISTS services (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    branch_id INT,
+    name VARCHAR(255) NOT NULL,
+    cost DECIMAL(10, 2) NOT NULL,
+    doc_comm_pct DECIMAL(5, 2) DEFAULT 0,
+    tech_comm_pct DECIMAL(5, 2) DEFAULT 0,
+    nurse_comm_pct DECIMAL(5, 2) DEFAULT 0,
+    status ENUM('Active', 'Inactive') DEFAULT 'Active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (branch_id) REFERENCES branches(id)
+);
+
+-- Invoice Items
+CREATE TABLE IF NOT EXISTS invoice_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    invoice_id INT,
+    service_id INT,
+    quantity INT DEFAULT 1,
+    unit_price DECIMAL(10, 2),
+    total_price DECIMAL(10, 2),
+    FOREIGN KEY (invoice_id) REFERENCES invoices(id),
+    FOREIGN KEY (service_id) REFERENCES services(id)
 );
 
 -- Payments
@@ -147,31 +167,6 @@ CREATE TABLE IF NOT EXISTS payments (
     payment_mode ENUM('Cash', 'Card', 'UPI', 'Benefit'),
     transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (invoice_id) REFERENCES invoices(id)
-);
-
--- Inventory
-CREATE TABLE IF NOT EXISTS inventory (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    branch_id INT,
-    item_name VARCHAR(255),
-    category VARCHAR(100),
-    quantity INT DEFAULT 0,
-    unit VARCHAR(20),
-    low_stock_threshold INT DEFAULT 5,
-    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (branch_id) REFERENCES branches(id)
-);
--- Services & Procedures
-CREATE TABLE IF NOT EXISTS services (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    branch_id INT,
-    name VARCHAR(255) NOT NULL,
-    cost DECIMAL(10, 2) NOT NULL,
-    doc_comm_pct DECIMAL(5, 2) DEFAULT 0,
-    tech_comm_pct DECIMAL(5, 2) DEFAULT 0,
-    nurse_comm_pct DECIMAL(5, 2) DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (branch_id) REFERENCES branches(id)
 );
 
 -- Wallet Transactions
@@ -186,15 +181,15 @@ CREATE TABLE IF NOT EXISTS wallet_transactions (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- Update users for individual commission and wallet balance
-ALTER TABLE users ADD COLUMN commission_pct DECIMAL(5, 2) DEFAULT 0;
-ALTER TABLE users ADD COLUMN wallet_balance DECIMAL(10, 2) DEFAULT 0;
-
--- Update branches for global commission model
-ALTER TABLE branches ADD COLUMN commission_model ENUM('service', 'individual') DEFAULT 'service';
-
--- Update invoices to link performing staff
-ALTER TABLE invoices ADD COLUMN doctor_id INT;
-ALTER TABLE invoices ADD COLUMN assistant_id INT;
-ALTER TABLE invoices ADD FOREIGN KEY (doctor_id) REFERENCES users(id);
-ALTER TABLE invoices ADD FOREIGN KEY (assistant_id) REFERENCES users(id);
+-- Inventory
+CREATE TABLE IF NOT EXISTS inventory (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    branch_id INT,
+    item_name VARCHAR(255),
+    category VARCHAR(100),
+    quantity INT DEFAULT 0,
+    unit VARCHAR(20),
+    low_stock_threshold INT DEFAULT 5,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (branch_id) REFERENCES branches(id)
+);

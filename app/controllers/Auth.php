@@ -67,6 +67,19 @@ class Auth extends Controller {
         $_SESSION['user_email'] = $user->email;
         $_SESSION['user_name'] = $user->name;
         $_SESSION['role_id'] = $user->role_id;
+        $_SESSION['branch_id'] = $user->branch_id;
+        
+        // Get branch name
+        $this->db->query("SELECT name FROM branches WHERE id = :id");
+        $this->db->bind(':id', $user->branch_id);
+        $branch = $this->db->single();
+        $_SESSION['branch_name'] = $branch ? $branch->name : 'Global';
+
+        // Get role name
+        $this->db->query("SELECT name FROM roles WHERE id = :id");
+        $this->db->bind(':id', $user->role_id);
+        $role = $this->db->single();
+        $_SESSION['user_role'] = $role->name;
     }
 
     public function logout() {
