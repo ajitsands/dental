@@ -161,3 +161,40 @@ CREATE TABLE IF NOT EXISTS inventory (
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (branch_id) REFERENCES branches(id)
 );
+-- Services & Procedures
+CREATE TABLE IF NOT EXISTS services (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    branch_id INT,
+    name VARCHAR(255) NOT NULL,
+    cost DECIMAL(10, 2) NOT NULL,
+    doc_comm_pct DECIMAL(5, 2) DEFAULT 0,
+    tech_comm_pct DECIMAL(5, 2) DEFAULT 0,
+    nurse_comm_pct DECIMAL(5, 2) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (branch_id) REFERENCES branches(id)
+);
+
+-- Wallet Transactions
+CREATE TABLE IF NOT EXISTS wallet_transactions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    amount DECIMAL(10, 2) NOT NULL,
+    type ENUM('Credit', 'Debit') NOT NULL,
+    description TEXT,
+    reference_id INT, -- Payment ID
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- Update users for individual commission and wallet balance
+ALTER TABLE users ADD COLUMN commission_pct DECIMAL(5, 2) DEFAULT 0;
+ALTER TABLE users ADD COLUMN wallet_balance DECIMAL(10, 2) DEFAULT 0;
+
+-- Update branches for global commission model
+ALTER TABLE branches ADD COLUMN commission_model ENUM('service', 'individual') DEFAULT 'service';
+
+-- Update invoices to link performing staff
+ALTER TABLE invoices ADD COLUMN doctor_id INT;
+ALTER TABLE invoices ADD COLUMN assistant_id INT;
+ALTER TABLE invoices ADD FOREIGN KEY (doctor_id) REFERENCES users(id);
+ALTER TABLE invoices ADD FOREIGN KEY (assistant_id) REFERENCES users(id);
