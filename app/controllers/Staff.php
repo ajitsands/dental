@@ -122,4 +122,37 @@ class Staff extends Controller {
             exit;
         }
     }
+
+    public function reset_password() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            header('Content-Type: application/json');
+            $id = $_POST['id'] ?? null;
+            $newPassword = $_POST['new_password'] ?? '';
+
+            if (!$id || empty($newPassword)) {
+                echo json_encode(['status' => 'error', 'message' => 'Missing user ID or password']);
+                exit;
+            }
+
+            // Check if Super Admin or same branch Admin
+            $user = $this->userModel->getUserById($id);
+            if (!$user) {
+                echo json_encode(['status' => 'error', 'message' => 'User not found']);
+                exit;
+            }
+
+            $isSuperAdmin = ((int)$_SESSION['role_id'] === 6);
+            if (!$isSuperAdmin && (int)$user->branch_id !== (int)$_SESSION['branch_id']) {
+                echo json_encode(['status' => 'error', 'message' => 'Unauthorized access']);
+                exit;
+            }
+
+            if ($this->userModel->resetPassword($id, $newPassword)) {
+                echo json_encode(['status' => 'success', 'message' => 'Password reset successfully']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Failed to reset password']);
+            }
+            exit;
+        }
+    }
 }

@@ -100,4 +100,36 @@ class Auth extends Controller {
         session_destroy();
         header('Location: ' . BASE_URL . '/auth/login');
     }
+
+    public function forgot_password() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            header('Content-Type: application/json');
+            
+            $email = trim($_POST['email']);
+            $phone = trim($_POST['phone']);
+            $newPassword = $_POST['new_password'] ?? '';
+
+            // 1. Find user by email
+            $user = $this->userModel->findUserByEmail($email);
+
+            if (!$user) {
+                echo json_encode(['status' => 'error', 'message' => 'Email not found in our records']);
+                exit;
+            }
+
+            // 2. Verify Phone match
+            if (trim($user->phone) !== $phone) {
+                echo json_encode(['status' => 'error', 'message' => 'Identity verification failed. Phone number does not match.']);
+                exit;
+            }
+
+            // 3. Reset Password
+            if ($this->userModel->resetPassword($user->id, $newPassword)) {
+                echo json_encode(['status' => 'success', 'message' => 'Password reset successful. You can now login with your new password.']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Failed to reset password. Please try again.']);
+            }
+            exit;
+        }
+    }
 }

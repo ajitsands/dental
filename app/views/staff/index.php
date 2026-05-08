@@ -64,6 +64,9 @@
                         <td class="fw-bold text-success"><?php echo formatCurrency($s->wallet_balance); ?></td>
                         <td class="text-end pe-4">
                             <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-warning" onclick="openResetModal(<?php echo $s->id; ?>, '<?php echo $s->name; ?>')" title="Reset Password">
+                                    <i class="fas fa-key"></i>
+                                </button>
                                 <button class="btn btn-sm btn-outline-primary" onclick="openEditModal(<?php echo $s->id; ?>)">
                                     <i class="fas fa-edit"></i>
                                 </button>
@@ -76,6 +79,29 @@
                     <?php endforeach; ?>
                 </tbody>
             </table>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div class="modal fade" id="resetModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning text-dark border-0">
+                <h6 class="modal-title fw-bold"><i class="fas fa-key me-2"></i> Reset Password</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="resetUserId">
+                <p class="small text-muted mb-3">Set a new password for <strong id="resetUserName"></strong></p>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">New Password</label>
+                    <input type="text" id="newPassword" class="form-control form-control-sm" placeholder="Minimum 6 characters">
+                </div>
+                <div class="d-grid">
+                    <button type="button" class="btn btn-warning btn-sm fw-bold" onclick="confirmReset()">Update Password</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -158,14 +184,48 @@
 
 <script>
 let staffModal;
+let resetModal;
 
 $(document).ready(function() {
     staffModal = new bootstrap.Modal(document.getElementById('staffModal'));
+    resetModal = new bootstrap.Modal(document.getElementById('resetModal'));
     $('#staffTable').DataTable({
         "pageLength": 10,
         "language": dtLanguage
     });
 });
+
+function openResetModal(id, name) {
+    $('#resetUserId').val(id);
+    $('#resetUserName').text(name);
+    $('#newPassword').val('');
+    resetModal.show();
+}
+
+function confirmReset() {
+    const id = $('#resetUserId').val();
+    const pass = $('#newPassword').val();
+    
+    if(pass.length < 4) {
+        Swal.fire('Error', 'Password is too short', 'error');
+        return;
+    }
+
+    $.ajax({
+        url: '<?php echo BASE_URL; ?>/staff/reset_password',
+        type: 'POST',
+        data: { id: id, new_password: pass },
+        dataType: 'json',
+        success: function(response) {
+            if(response.status === 'success') {
+                Swal.fire('Success', response.message, 'success');
+                resetModal.hide();
+            } else {
+                Swal.fire('Error', response.message, 'error');
+            }
+        }
+    });
+}
 
 function openAddModal() {
     $('#modalTitle').text('Add New Staff Member');

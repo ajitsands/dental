@@ -123,22 +123,52 @@
             </div>
             <button type="submit" class="btn btn-primary w-100 mb-3" id="loginBtn">Login</button>
             <div class="text-center">
-                <a href="#" class="text-decoration-none small text-muted">Forgot password?</a>
+                <a href="#" class="text-decoration-none small text-muted" data-bs-toggle="modal" data-bs-target="#forgotModal">Forgot password?</a>
             </div>
         </form>
     </div>
 </div>
 
-<!-- JQuery -->
+<!-- Forgot Password Modal -->
+<div class="modal fade" id="forgotModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-light border-0">
+                <h5 class="modal-title fw-bold text-primary">Identity Verification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="small text-muted mb-4">Please verify your registered details to reset your password.</p>
+                <form id="forgotForm">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Registered Email</label>
+                        <input type="email" name="email" class="form-control" placeholder="your@email.com" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Registered Phone Number</label>
+                        <input type="text" name="phone" class="form-control" placeholder="As per staff records" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">New Password</label>
+                        <input type="password" name="new_password" class="form-control" placeholder="Minimum 6 characters" required minlength="6">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 fw-bold" id="resetBtn">Verify & Reset Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 $(document).ready(function() {
+    // Login Handling
     $('#loginForm').on('submit', function(e) {
         e.preventDefault();
-        
         const btn = $('#loginBtn');
         btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Verifying...');
 
@@ -151,22 +181,41 @@ $(document).ready(function() {
                 if(response.status === 'success') {
                     window.location.href = '<?php echo BASE_URL; ?>/dashboard';
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Login Failed',
-                        text: response.message,
-                        confirmButtonColor: '#0d6efd'
-                    });
+                    Swal.fire({ icon: 'error', title: 'Login Failed', text: response.message });
                     btn.prop('disabled', false).text('Login');
                 }
             },
             error: function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Server connection failed'
-                });
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Server connection failed' });
                 btn.prop('disabled', false).text('Login');
+            }
+        });
+    });
+
+    // Forgot Password Handling
+    $('#forgotForm').on('submit', function(e) {
+        e.preventDefault();
+        const btn = $('#resetBtn');
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Verifying...');
+
+        $.ajax({
+            url: '<?php echo BASE_URL; ?>/auth/forgot_password',
+            type: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+            success: function(response) {
+                if(response.status === 'success') {
+                    Swal.fire({ icon: 'success', title: 'Reset Successful', text: response.message });
+                    $('#forgotModal').modal('hide');
+                    $('#forgotForm')[0].reset();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Verification Failed', text: response.message });
+                }
+                btn.prop('disabled', false).text('Verify & Reset Password');
+            },
+            error: function() {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Server connection failed' });
+                btn.prop('disabled', false).text('Verify & Reset Password');
             }
         });
     });

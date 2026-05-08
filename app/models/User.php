@@ -98,4 +98,12 @@ class User extends Model {
         $this->db->bind(':id', $id);
         return $this->db->execute();
     }
+
+    public function resetPassword($id, $newPassword) {
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        $this->db->query('UPDATE users SET password = :password WHERE id = :id');
+        $this->db->bind(':id', $id);
+        $this->db->bind(':password', $hashedPassword);
+        return $this->db->execute();
+    }
 }
