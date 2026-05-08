@@ -11,27 +11,52 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
+        .bg-icons {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .bg-icon {
+            position: absolute;
+            color: rgba(13, 110, 253, 0.07);
+            pointer-events: none;
+            user-select: none;
+            animation: float-around 25s infinite linear;
+        }
+        @keyframes float-around {
+            0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+            33% { transform: translate(50px, 50px) rotate(120deg) scale(1.1); }
+            66% { transform: translate(-30px, 80px) rotate(240deg) scale(0.9); }
+            100% { transform: translate(0, 0) rotate(360deg) scale(1); }
+        }
         body {
             font-family: 'Outfit', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin: 0;
         }
         .login-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            border: 1px solid rgba(255,255,255,0.5);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             overflow: hidden;
+            position: relative;
+            z-index: 10;
         }
         .login-header {
             background: #0d6efd;
-            padding: 40px 20px;
+            padding: 45px 20px;
             text-align: center;
             color: white;
         }
@@ -39,30 +64,41 @@
             padding: 40px;
         }
         .form-control {
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 12px 15px;
             border: 1px solid #e0e0e0;
+            background: rgba(255, 255, 255, 0.9);
         }
         .btn-primary {
-            border-radius: 10px;
-            padding: 12px;
-            font-weight: 600;
+            border-radius: 12px;
+            padding: 14px;
+            font-weight: 700;
             background: #0d6efd;
             border: none;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(13, 110, 253, 0.4);
         }
         .logo-text {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -1px;
         }
     </style>
 </head>
 <body>
+
+<div class="bg-icons">
+    <i class="fas fa-tooth bg-icon" style="top: 10%; left: 10%; font-size: 120px; animation-duration: 30s;"></i>
+    <i class="fas fa-hospital bg-icon" style="top: 20%; left: 80%; font-size: 100px; animation-duration: 25s; animation-delay: -5s;"></i>
+    <i class="fas fa-user-md bg-icon" style="top: 70%; left: 15%; font-size: 140px; animation-duration: 35s; animation-delay: -10s;"></i>
+    <i class="fas fa-stethoscope bg-icon" style="top: 80%; left: 75%; font-size: 90px; animation-duration: 20s; animation-delay: -2s;"></i>
+    <i class="fas fa-calendar-check bg-icon" style="top: 40%; left: 45%; font-size: 110px; opacity: 0.03; animation-duration: 40s;"></i>
+    <i class="fas fa-file-invoice bg-icon" style="top: 60%; left: 85%; font-size: 80px; animation-duration: 28s; animation-delay: -15s;"></i>
+    <i class="fas fa-tooth bg-icon" style="top: 85%; left: 40%; font-size: 60px; animation-duration: 22s; animation-delay: -7s;"></i>
+</div>
 
 <div class="login-card">
     <div class="login-header">
