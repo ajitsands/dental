@@ -361,6 +361,7 @@
                     <li class="nav-item">
                         <a class="nav-link <?php echo isActive('/service', $current_url); ?>" href="<?php echo BASE_URL; ?>/service"><i class="fas fa-concierge-bell me-1"></i> <?php echo __('services'); ?></a>
                     </li>
+                    <?php if ($_SESSION['role_id'] == 1 || $_SESSION['role_id'] == 6): ?>
                     <li class="nav-item">
                         <a class="nav-link <?php echo isActive('/staff', $current_url); ?>" href="<?php echo BASE_URL; ?>/staff"><i class="fas fa-user-md me-1"></i> <?php echo __('staff'); ?></a>
                     </li>
@@ -375,6 +376,7 @@
                             <li><a class="dropdown-item fw-bold" href="<?php echo BASE_URL; ?>/report/ledgerSummary"><i class="fas fa-file-invoice-dollar me-2"></i> Ledger Summary</a></li>
                         </ul>
                     </li>
+                    <?php endif; ?>
                 </ul>
                 <div class="d-flex align-items-center">
                     <div class="dropdown me-3">

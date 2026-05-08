@@ -3,27 +3,32 @@
 <style>
     /* Settings Sidebar Styling */
     #settings-tabs .nav-link {
-        color: #475569;
+        color: #64748b; /* Slate blue-grey for better visibility */
         font-weight: 500;
-        border-radius: 10px;
-        transition: all 0.3s ease;
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border: 1px solid transparent;
+        padding: 12px 20px;
+        margin-bottom: 8px;
     }
 
     #settings-tabs .nav-link:hover {
-        background-color: rgba(13, 110, 253, 0.05);
+        background-color: #f1f5f9;
         color: var(--primary-color);
+        transform: translateX(5px);
     }
 
     #settings-tabs .nav-link.active {
-        background-color: var(--primary-color) !important;
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%) !important;
         color: white !important;
-        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+        box-shadow: 0 4px 15px rgba(13, 110, 253, 0.25);
+        border: none;
     }
 
     #settings-tabs .nav-link i {
-        width: 20px;
+        width: 24px;
         text-align: center;
+        font-size: 1.1rem;
     }
 </style>
 
