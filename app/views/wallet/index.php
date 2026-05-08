@@ -27,7 +27,17 @@
                             <div class="fw-bold text-dark"><?php echo $s->name; ?></div>
                             <div class="small text-muted"><?php echo $s->email; ?></div>
                         </td>
-                        <td><span class="badge bg-light text-dark border"><?php echo $s->role_name; ?></span></td>
+                        <td>
+                            <?php 
+                                $roleClass = 'bg-light text-dark';
+                                $roleName = strtolower($s->role_name);
+                                if(strpos($roleName, 'dentist') !== false) $roleClass = 'bg-primary-subtle text-primary border-primary-subtle';
+                                elseif(strpos($roleName, 'technician') !== false) $roleClass = 'bg-info-subtle text-info border-info-subtle';
+                                elseif(strpos($roleName, 'nurse') !== false) $roleClass = 'bg-success-subtle text-success border-success-subtle';
+                                elseif(strpos($roleName, 'admin') !== false) $roleClass = 'bg-secondary-subtle text-secondary border-secondary-subtle';
+                            ?>
+                            <span class="badge <?php echo $roleClass; ?> border px-3 rounded-pill"><?php echo $s->role_name; ?></span>
+                        </td>
                         <?php if($data['isSuperAdmin']): ?>
                             <td><span class="badge bg-primary-subtle text-primary border border-primary-subtle"><?php echo $s->branch_name; ?></span></td>
                         <?php endif; ?>

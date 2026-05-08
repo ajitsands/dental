@@ -56,8 +56,8 @@
                                 <button onclick="viewPrescriptions(<?php echo $p->id; ?>, '<?php echo addslashes($p->name); ?>')" class="btn btn-sm btn-outline-success" title="Print Prescription">
                                     <i class="fas fa-file-prescription"></i> Rx
                                 </button>
-                                <a href="<?php echo BASE_URL; ?>/patient/chart/<?php echo $p->id; ?>" class="btn btn-sm btn-outline-info" title="Dental Chart">
-                                    <i class="fas fa-tooth"></i> Chart
+                                <a href="<?php echo BASE_URL; ?>/patient/ledger/<?php echo $p->id; ?>" class="btn btn-sm btn-outline-warning" title="Financial Ledger">
+                                    <i class="fas fa-wallet"></i> Ledger
                                 </a>
                             </div>
                         </td>

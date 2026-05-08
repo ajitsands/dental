@@ -11,6 +11,9 @@
         <h2 class="mb-0"><?php echo $data['patient']->name; ?> <span class="badge bg-light text-primary fs-6 ms-2"><?php echo $data['patient']->unique_id; ?></span></h2>
     </div>
     <div class="col-md-4 text-end pt-3">
+        <a href="<?php echo BASE_URL; ?>/patient/ledger/<?php echo $data['patient']->id; ?>" class="btn btn-outline-warning rounded-pill px-4 shadow-sm me-2">
+            <i class="fas fa-wallet me-1"></i> Financial Ledger
+        </a>
         <a href="<?php echo BASE_URL; ?>/patient/chart/<?php echo $data['patient']->id; ?>" class="btn btn-outline-info rounded-pill px-4 shadow-sm">
             <i class="fas fa-tooth me-1"></i> View Dental Chart
         </a>

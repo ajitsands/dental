@@ -145,24 +145,34 @@
 
         /* Navbar Styling */
         .navbar {
-            background: var(--navbar-bg);
-            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             padding: 0.75rem 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            transition: background 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand, .navbar-brand i {
+            color: #ffffff !important;
         }
 
         .nav-link {
-            color: var(--text-muted);
+            color: rgba(255, 255, 255, 0.8) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
 
         .nav-link:hover, .nav-link.active {
-            color: var(--primary-color) !important;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff !important;
         }
 
         .dropdown-menu {
             background-color: var(--card-bg);
             border-color: var(--border-color);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
         .dropdown-item {
@@ -375,6 +385,8 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="<?php echo BASE_URL; ?>/patient/ledger"><i class="fas fa-address-book me-2"></i> <?php echo __('patient_balances'); ?></a></li>
                             <li><a class="dropdown-item" href="<?php echo BASE_URL; ?>/wallet"><i class="fas fa-users-cog me-2"></i> <?php echo __('staff_commission'); ?></a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item fw-bold" href="<?php echo BASE_URL; ?>/report/ledgerSummary"><i class="fas fa-file-invoice-dollar me-2"></i> Ledger Summary</a></li>
                         </ul>
                     </li>
                 </ul>

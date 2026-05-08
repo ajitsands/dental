@@ -29,8 +29,8 @@
                         <th class="ps-4">Date & Time</th>
                         <th>Transaction Type</th>
                         <th>Description / Reference</th>
-                        <th>Credit (Earnings)</th>
-                        <th>Debit (Payouts)</th>
+                        <th class="text-success">Credit (Earnings)</th>
+                        <th class="text-danger">Debit (Payouts)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -57,10 +57,10 @@
                                     <div class="small text-muted">Ref: Invoice <strong>#<?php echo $t->invoice_number; ?></strong></div>
                                 <?php endif; ?>
                             </td>
-                            <td class="fw-bold text-success">
+                            <td class="fw-bold" style="color: #28a745 !important;">
                                 <?php echo ($t->type == 'Credit') ? formatCurrency($t->amount) : '-'; ?>
                             </td>
-                            <td class="fw-bold text-danger">
+                            <td class="fw-bold" style="color: #dc3545 !important;">
                                 <?php echo ($t->type == 'Debit') ? formatCurrency($t->amount) : '-'; ?>
                             </td>
                         </tr>
@@ -77,13 +77,13 @@
                     ?>
                     <tr>
                         <td colspan="3" class="ps-4 text-end">TOTALS:</td>
-                        <td class="text-success"><?php echo number_format($totalCredit, 2); ?></td>
-                        <td class="text-danger"><?php echo number_format($totalDebit, 2); ?></td>
+                        <td style="color: #28a745 !important;"><?php echo number_format($totalCredit, 2); ?></td>
+                        <td style="color: #dc3545 !important;"><?php echo number_format($totalDebit, 2); ?></td>
                     </tr>
-                    <tr class="table-primary border-top">
+                    <tr class="border-top <?php echo ($netBalance >= 0) ? 'bg-success-subtle' : 'bg-danger-subtle'; ?>">
                         <td colspan="4" class="ps-4 text-end fs-5">NET PAYABLE BALANCE:</td>
-                        <?php $netClass = ($netBalance >= 0) ? 'text-success' : 'text-danger'; ?>
-                        <td class="<?php echo $netClass; ?> fs-4"><?php echo formatCurrency($netBalance); ?></td>
+                        <?php $netHex = ($netBalance >= 0) ? '#28a745' : '#dc3545'; ?>
+                        <td class="fs-4 fw-bold" style="color: <?php echo $netHex; ?> !important;"><?php echo formatCurrency($netBalance); ?></td>
                     </tr>
                 </tfoot>
             </table>

@@ -38,8 +38,8 @@
                     <tr>
                         <th class="ps-4">Date</th>
                         <th>Description / Reference</th>
-                        <th>Charge (DR)</th>
-                        <th>Payment (CR)</th>
+                        <th class="text-danger bg-danger-subtle bg-opacity-10 text-center">Charge (DR)</th>
+                        <th class="text-success bg-success-subtle bg-opacity-10 text-center">Payment (CR)</th>
                         <th class="pe-4 text-end">Running Balance</th>
                     </tr>
                 </thead>
@@ -57,15 +57,19 @@
                         <td>
                             <div class="fw-bold">
                                 <?php if($t->type == 'Invoice'): ?>
-                                    <i class="fas fa-file-invoice text-muted me-2"></i> Invoice #<?php echo $t->ref; ?>
+                                    <span class="text-danger"><i class="fas fa-file-invoice me-2"></i> Invoice #<?php echo $t->ref; ?></span>
                                 <?php else: ?>
-                                    <i class="fas fa-receipt text-success me-2"></i> Payment via <?php echo $t->ref; ?>
+                                    <span class="text-success"><i class="fas fa-receipt me-2"></i> Payment via <?php echo $t->ref; ?></span>
                                 <?php endif; ?>
                             </div>
                         </td>
-                        <td class="text-danger fw-bold"><?php echo ($t->type == 'Invoice') ? formatCurrency($t->amount) : '-'; ?></td>
-                        <td class="text-success fw-bold"><?php echo ($t->type == 'Payment') ? formatCurrency($t->amount) : '-'; ?></td>
-                        <td class="pe-4 text-end fw-bold <?php echo ($runningBalance > 0) ? 'text-danger' : 'text-success'; ?>">
+                        <td class="text-center fw-bold text-danger bg-danger-subtle bg-opacity-10" style="color: #dc3545 !important;">
+                            <?php echo ($t->type == 'Invoice') ? formatCurrency($t->amount) : '-'; ?>
+                        </td>
+                        <td class="text-center fw-bold text-success bg-success-subtle bg-opacity-10" style="color: #28a745 !important;">
+                            <?php echo ($t->type == 'Payment') ? formatCurrency($t->amount) : '-'; ?>
+                        </td>
+                        <td class="pe-4 text-end fw-bold" style="color: <?php echo ($runningBalance > 0) ? '#dc3545' : '#28a745'; ?> !important;">
                             <?php echo formatCurrency($runningBalance); ?>
                         </td>
                     </tr>
