@@ -2,7 +2,7 @@
 // app/core/Router.php
 
 class Router {
-    protected $currentController = 'Dashboard';
+    protected $currentController = 'Home';
     protected $currentMethod = 'index';
     protected $params = [];
 
