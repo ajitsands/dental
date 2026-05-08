@@ -9,12 +9,15 @@ class BillingModel extends Model {
     }
 
     public function createInvoice($data) {
+        $branchId = $_SESSION['branch_id'] ?? 1;
+        $invoiceNumber = $this->generateInvoiceNumber($branchId);
+
         $this->db->query('INSERT INTO invoices (branch_id, patient_id, invoice_number, total_amount, tax_amount, final_amount, status, doctor_id, technician_id, nurse_id) 
                           VALUES (:branch_id, :patient_id, :invoice_number, :total_amount, :tax_amount, :final_amount, "Unpaid", :doctor_id, :technician_id, :nurse_id)');
         
-        $this->db->bind(':branch_id', $_SESSION['branch_id'] ?? 1);
+        $this->db->bind(':branch_id', $branchId);
         $this->db->bind(':patient_id', $data['patient_id']);
-        $this->db->bind(':invoice_number', 'INV-' . date('Y') . '-' . rand(1000, 9999));
+        $this->db->bind(':invoice_number', $invoiceNumber);
         $this->db->bind(':total_amount', $data['total_amount']);
         $this->db->bind(':tax_amount', $data['tax_amount']);
         $this->db->bind(':final_amount', $data['final_amount']);
@@ -26,6 +29,30 @@ class BillingModel extends Model {
             return $this->db->lastInsertId();
         }
         return false;
+    }
+
+    private function generateInvoiceNumber($branchId) {
+        $year = date('Y');
+        $prefix = "INV-$year-";
+        
+        // Find the maximum invoice number for this year and branch
+        // Using MAX() on the string works for zero-padded numbers
+        $this->db->query("SELECT MAX(invoice_number) as last_inv FROM invoices 
+                          WHERE branch_id = :branch_id 
+                          AND invoice_number LIKE :pattern");
+        $this->db->bind(':branch_id', $branchId);
+        $this->db->bind(':pattern', $prefix . '%');
+        
+        $row = $this->db->single();
+        
+        $nextNum = 1;
+        if ($row && !empty($row->last_inv)) {
+            $parts = explode('-', $row->last_inv);
+            $lastNum = (int)end($parts);
+            $nextNum = $lastNum + 1;
+        }
+        
+        return $prefix . str_pad($nextNum, 4, '0', STR_PAD_LEFT);
     }
 
     public function recordPayment($invoiceId, $amount, $mode) {
