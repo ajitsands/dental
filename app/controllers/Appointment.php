@@ -68,4 +68,28 @@ class Appointment extends Controller {
         }
         exit;
     }
+    
+    public function reschedule() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            header('Content-Type: application/json');
+            $id = $_POST['id'] ?? null;
+            $date = $_POST['date'] ?? '';
+            $time = $_POST['time'] ?? '';
+            
+            if (!$id || !$date || !$time) {
+                echo json_encode(['status' => 'error', 'message' => 'Missing required fields']);
+                exit;
+            }
+            
+            $startTime = $date . ' ' . date('H:i:s', strtotime($time));
+            $endTime = $date . ' ' . date('H:i:s', strtotime($time . ' +1 hour'));
+            
+            if ($this->appointmentModel->rescheduleAppointment($id, $startTime, $endTime)) {
+                echo json_encode(['status' => 'success', 'message' => 'Appointment rescheduled successfully']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Failed to reschedule appointment']);
+            }
+            exit;
+        }
+    }
 }

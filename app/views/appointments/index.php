@@ -1,14 +1,18 @@
 <?php require_once APPROOT . '/app/views/layouts/header.php'; ?>
 
 <?php
-// Get current week dates
+// Get current week dates - Start from Sunday to avoid skipping days
 $today = isset($_GET['date']) ? strtotime($_GET['date']) : time();
-$startOfWeek = strtotime('monday this week', $today);
+// Ensure we always start on the Sunday of the week for the given date
+$startOfWeek = (date('w', $today) == 0) ? $today : strtotime('last sunday', $today);
 $weekDates = [];
-for ($i = 0; $i < 6; $i++) {
-    $weekDates[] = date('D d', strtotime("+$i days", $startOfWeek));
+$weekDatesFull = []; // To store full Y-m-d for drag & drop
+for ($i = 0; $i < 7; $i++) {
+    $dateTs = strtotime("+$i days", $startOfWeek);
+    $weekDates[] = date('D d', $dateTs);
+    $weekDatesFull[] = date('Y-m-d', $dateTs);
 }
-$weekRangeText = date('M d', $startOfWeek) . ' - ' . date('M d', strtotime('+5 days', $startOfWeek)) . ', ' . date('Y', $startOfWeek);
+$weekRangeText = date('M d', $startOfWeek) . ' - ' . date('M d', strtotime('+6 days', $startOfWeek)) . ', ' . date('Y', $startOfWeek);
 ?>
 
 <div class="row mb-4">
@@ -55,20 +59,29 @@ $weekRangeText = date('M d', $startOfWeek) . ' - ' . date('M d', strtotime('+5 d
                     ?>
                     <tr>
                         <td class="fw-bold small" style="background-color: var(--sidebar-active);"> <?php echo $time; ?></td>
-                        <?php foreach($weekDates as $day): ?>
-                        <td style="min-height: 80px; vertical-align: top; padding: 5px;">
+                        <?php foreach($weekDates as $idx => $day): ?>
+                        <td style="min-height: 80px; vertical-align: top; padding: 5px;" 
+                            onmouseover="this.style.backgroundColor='#f8fafc'" 
+                            onmouseout="this.style.backgroundColor=''"
+                            ondragover="event.preventDefault()" 
+                            ondrop="handleDrop(event, '<?php echo $weekDatesFull[$idx]; ?>', '<?php echo $time; ?>')">
                             <?php 
                             foreach($data['appointments'] as $app): 
                                 $appTime = date('h:i A', strtotime($app->start_time));
                                 $appDay = date('D d', strtotime($app->start_time));
                                 if($appTime == $time && $appDay == $day):
                             ?>
-                            <div class="appointment-card badge bg-primary w-100 p-2 text-start mb-1 shadow-sm" 
+                            <?php 
+                                $statusClass = ($app->status == 'Completed') ? 'bg-success' : 'bg-primary';
+                            ?>
+                            <div class="appointment-card badge <?php echo $statusClass; ?> w-100 p-2 text-start mb-1 shadow-sm" 
+                                 draggable="true"
+                                 ondragstart="event.dataTransfer.setData('appId', <?php echo $app->id; ?>)"
                                  onclick="manageAppointment(<?php echo $app->id; ?>, '<?php echo addslashes($app->patient_name); ?>', '<?php echo date('H:i A', strtotime($app->start_time)); ?>')"
                                  style="white-space: normal; cursor: pointer; transition: transform 0.2s;">
                                  <div class="fw-bold d-flex justify-content-between">
                                      <span><?php echo $app->patient_name; ?></span>
-                                     <i class="fas fa-ellipsis-v small opacity-50"></i>
+                                     <i class="fas fa-grip-lines-vertical small opacity-50"></i>
                                  </div>
                                  <div class="small opacity-75"><?php echo $app->notes; ?></div>
                                  <div class="mt-1 d-flex justify-content-between align-items-center" style="font-size: 9px;">
@@ -275,6 +288,37 @@ function cancelAppointment() {
             $.post('<?php echo BASE_URL; ?>/appointment/cancel/' + id, function(response) {
                 if(response.status === 'success') {
                     Swal.fire({ icon: 'success', title: 'Cancelled', text: response.message, timer: 1500 }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Error', response.message, 'error');
+                }
+            }, 'json');
+        }
+    });
+}
+
+function handleDrop(event, date, time) {
+    event.preventDefault();
+    const appId = event.dataTransfer.getData('appId');
+    if(!appId) return;
+
+    Swal.fire({
+        title: 'Reschedule Appointment?',
+        text: `Move appointment to ${date} at ${time}?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#0d6efd',
+        confirmButtonText: 'Yes, Move'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post('<?php echo BASE_URL; ?>/appointment/reschedule', {
+                id: appId,
+                date: date,
+                time: time
+            }, function(response) {
+                if(response.status === 'success') {
+                    Swal.fire({ icon: 'success', title: 'Moved!', text: response.message, timer: 1500 }).then(() => {
                         location.reload();
                     });
                 } else {

@@ -100,4 +100,12 @@ class AppointmentModel extends Model {
         $this->db->bind(':id', $id);
         return $this->db->execute();
     }
+
+    public function rescheduleAppointment($id, $startTime, $endTime) {
+        $this->db->query('UPDATE appointments SET start_time = :start, end_time = :end WHERE id = :id');
+        $this->db->bind(':start', $startTime);
+        $this->db->bind(':end', $endTime);
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
 }
