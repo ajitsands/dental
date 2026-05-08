@@ -158,4 +158,21 @@ class Billing extends Controller {
         ];
         $this->view('billing/print_receipt', $data);
     }
+
+    public function delete($id) {
+        header('Content-Type: application/json');
+        
+        // 1. First Reverse Wallet Commissions
+        if ($this->walletModel->reverseCommissionByInvoice($id)) {
+            // 2. Then Delete Invoice and associated data
+            if ($this->billingModel->deleteInvoice($id)) {
+                echo json_encode(['status' => 'success', 'message' => 'Invoice deleted and staff commissions reversed.']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Failed to delete invoice records.']);
+            }
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Failed to reverse staff commissions. Action aborted.']);
+        }
+        exit;
+    }
 }

@@ -117,4 +117,31 @@ class BillingModel extends Model {
         $this->db->bind(':id', $id);
         return $this->db->single();
     }
+
+    public function deleteInvoice($id) {
+        try {
+            $this->db->beginTransaction();
+
+            // 1. Delete Invoice Items
+            $this->db->query('DELETE FROM invoice_items WHERE invoice_id = :id');
+            $this->db->bind(':id', $id);
+            $this->db->execute();
+
+            // 2. Delete Payments
+            $this->db->query('DELETE FROM payments WHERE invoice_id = :id');
+            $this->db->bind(':id', $id);
+            $this->db->execute();
+
+            // 3. Delete Invoice
+            $this->db->query('DELETE FROM invoices WHERE id = :id');
+            $this->db->bind(':id', $id);
+            $this->db->execute();
+
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return false;
+        }
+    }
 }

@@ -89,4 +89,41 @@ class WalletModel extends Model {
             return false;
         }
     }
+
+    public function reverseCommissionByInvoice($invoiceId) {
+        try {
+            $this->db->beginTransaction();
+
+            // 1. Get all payments for this invoice
+            $this->db->query('SELECT id FROM payments WHERE invoice_id = :id');
+            $this->db->bind(':id', $invoiceId);
+            $payments = $this->db->resultSet();
+
+            foreach ($payments as $payment) {
+                // 2. Find all transactions related to this payment
+                $this->db->query('SELECT * FROM wallet_transactions WHERE reference_id = :pay_id AND type = "Credit"');
+                $this->db->bind(':pay_id', $payment->id);
+                $transactions = $this->db->resultSet();
+
+                foreach ($transactions as $tx) {
+                    // 3. Deduct from user balance
+                    $this->db->query('UPDATE users SET wallet_balance = wallet_balance - :amount WHERE id = :user_id');
+                    $this->db->bind(':amount', $tx->amount);
+                    $this->db->bind(':user_id', $tx->user_id);
+                    $this->db->execute();
+                }
+
+                // 4. Delete the transactions
+                $this->db->query('DELETE FROM wallet_transactions WHERE reference_id = :pay_id');
+                $this->db->bind(':pay_id', $payment->id);
+                $this->db->execute();
+            }
+
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return false;
+        }
+    }
 }

@@ -82,6 +82,9 @@
                                 <a href="<?php echo BASE_URL; ?>/billing/printReceipt/<?php echo $inv->id; ?>" target="_blank" class="btn btn-sm btn-outline-secondary" title="Print Thermal Receipt">
                                     <i class="fas fa-print"></i>
                                 </a>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteInvoice(<?php echo $inv->id; ?>, '<?php echo $inv->invoice_number; ?>')" title="Delete Invoice">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -380,6 +383,35 @@ function savePayment() {
         error: function() {
             Swal.fire('Error', 'Connection error', 'error');
             btn.prop('disabled', false).text('Confirm & Add to Staff Wallets');
+        }
+    });
+}
+
+function deleteInvoice(id, num) {
+    Swal.fire({
+        title: 'Delete Invoice?',
+        text: `Are you sure you want to delete ${num}? This will also reverse all staff commissions related to this invoice.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Yes, Delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '<?php echo BASE_URL; ?>/billing/delete/' + id,
+                type: 'POST',
+                dataType: 'json',
+                success: function(response) {
+                    if(response.status === 'success') {
+                        Swal.fire({ icon: 'success', title: 'Deleted!', text: response.message, timer: 1500 }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error', response.message, 'error');
+                    }
+                }
+            });
         }
     });
 }

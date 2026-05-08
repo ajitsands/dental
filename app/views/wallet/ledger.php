@@ -12,7 +12,8 @@
         <p class="text-muted">Detailed transaction history for commissions and payouts.</p>
     </div>
     <div class="col-md-4 text-end pt-3">
-        <div class="card bg-success text-white border-0 shadow-sm p-3 d-inline-block" style="min-width: 200px; border-radius: 15px;">
+        <?php $balanceClass = ($data['user']->wallet_balance >= 0) ? 'bg-success' : 'bg-danger'; ?>
+        <div class="card <?php echo $balanceClass; ?> text-white border-0 shadow-sm p-3 d-inline-block" style="min-width: 200px; border-radius: 15px;">
             <div class="small fw-bold opacity-75 uppercase">Current Balance</div>
             <div class="h3 fw-bold mb-0"><?php echo formatCurrency($data['user']->wallet_balance); ?></div>
         </div>
@@ -28,8 +29,8 @@
                         <th class="ps-4">Date & Time</th>
                         <th>Transaction Type</th>
                         <th>Description / Reference</th>
-                        <th class="text-success">Credit (Earnings)</th>
-                        <th class="text-danger">Debit (Payouts)</th>
+                        <th>Credit (Earnings)</th>
+                        <th>Debit (Payouts)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -81,7 +82,8 @@
                     </tr>
                     <tr class="table-primary border-top">
                         <td colspan="4" class="ps-4 text-end fs-5">NET PAYABLE BALANCE:</td>
-                        <td class="text-primary fs-4"><?php echo formatCurrency($netBalance); ?></td>
+                        <?php $netClass = ($netBalance >= 0) ? 'text-success' : 'text-danger'; ?>
+                        <td class="<?php echo $netClass; ?> fs-4"><?php echo formatCurrency($netBalance); ?></td>
                     </tr>
                 </tfoot>
             </table>
