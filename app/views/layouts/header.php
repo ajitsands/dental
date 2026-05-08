@@ -268,7 +268,6 @@
         .navbar-brand {
             font-weight: 700;
             font-size: 1.5rem;
-            color: var(--primary-color) !important;
             display: flex;
             align-items: center;
         }
@@ -276,19 +275,6 @@
         .navbar-brand i {
             margin-right: 10px;
             font-size: 1.8rem;
-        }
-
-        .nav-link {
-            font-weight: 500;
-            color: #475569 !important;
-            padding: 0.5rem 1rem !important;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .nav-link:hover, .nav-link.active {
-            background-color: rgba(13, 110, 253, 0.1);
-            color: var(--primary-color) !important;
         }
 
         /* Dashboard Cards */
@@ -392,7 +378,7 @@
                 </ul>
                 <div class="d-flex align-items-center">
                     <div class="dropdown me-3">
-                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
                             <i class="fas fa-globe me-1"></i> <?php echo strtoupper($_SESSION['lang'] ?? 'EN'); ?>
                         </button>
                         <ul class="dropdown-menu">
@@ -407,17 +393,17 @@
                         </div>
                     <?php endif; ?>
                     <div class="theme-toggle me-3">
-                        <button class="btn btn-link text-muted p-0 border-0" id="themeToggle" onclick="toggleTheme()">
+                        <button class="btn btn-link text-white opacity-75 p-0 border-0" id="themeToggle" onclick="toggleTheme()">
                             <i class="fas fa-moon fs-5" id="themeIcon"></i>
                         </button>
                     </div>
 
                     <div class="dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="profileDropdown" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center text-white" href="#" id="profileDropdown" data-bs-toggle="dropdown">
                             <div class="densmart-logo bg-primary text-white me-2" style="width: 32px; height: 32px; font-size: 0.9rem;">
                                 <?php echo substr($_SESSION['user_name'] ?? 'U', 0, 1); ?>
                             </div>
-                            <span class="d-none d-md-inline"><?php echo $_SESSION['user_name'] ?? 'User'; ?></span>
+                            <span class="d-none d-md-inline text-white"><?php echo $_SESSION['user_name'] ?? 'User'; ?></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0">
                             <li><a class="dropdown-item" href="<?php echo BASE_URL; ?>/settings"><i class="fas fa-cog me-2"></i> <?php echo __('settings'); ?></a></li>

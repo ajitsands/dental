@@ -1,18 +1,39 @@
 <?php require_once APPROOT . '/app/views/layouts/header.php'; ?>
 
 <?php
-// Get current week dates - Start from Sunday to avoid skipping days
+// Get current state
 $today = isset($_GET['date']) ? strtotime($_GET['date']) : time();
-// Ensure we always start on the Sunday of the week for the given date
-$startOfWeek = (date('w', $today) == 0) ? $today : strtotime('last sunday', $today);
+$view = $_GET['view'] ?? 'week';
+
+// Ensure we have a valid view
+if (!in_array($view, ['day', 'week', 'month'])) $view = 'week';
+
 $weekDates = [];
-$weekDatesFull = []; // To store full Y-m-d for drag & drop
-for ($i = 0; $i < 7; $i++) {
-    $dateTs = strtotime("+$i days", $startOfWeek);
-    $weekDates[] = date('D d', $dateTs);
-    $weekDatesFull[] = date('Y-m-d', $dateTs);
+$weekDatesFull = [];
+
+if ($view == 'day') {
+    $weekDates[] = date('D d', $today);
+    $weekDatesFull[] = date('Y-m-d', $today);
+    $rangeText = date('l, M d, Y', $today);
+    $prevDate = date('Y-m-d', strtotime('-1 day', $today));
+    $nextDate = date('Y-m-d', strtotime('+1 day', $today));
+} elseif ($view == 'week') {
+    $startOfWeek = (date('w', $today) == 0) ? $today : strtotime('last sunday', $today);
+    for ($i = 0; $i < 7; $i++) {
+        $dateTs = strtotime("+$i days", $startOfWeek);
+        $weekDates[] = date('D d', $dateTs);
+        $weekDatesFull[] = date('Y-m-d', $dateTs);
+    }
+    $rangeText = date('M d', $startOfWeek) . ' - ' . date('M d', strtotime('+6 days', $startOfWeek)) . ', ' . date('Y', $startOfWeek);
+    $prevDate = date('Y-m-d', strtotime('-1 week', $today));
+    $nextDate = date('Y-m-d', strtotime('+1 week', $today));
+} else { // Month View
+    $startOfMonth = strtotime(date('Y-m-01', $today));
+    $endOfMonth = strtotime(date('Y-m-t', $today));
+    $rangeText = date('F Y', $today);
+    $prevDate = date('Y-m-d', strtotime('-1 month', $today));
+    $nextDate = date('Y-m-d', strtotime('+1 month', $today));
 }
-$weekRangeText = date('M d', $startOfWeek) . ' - ' . date('M d', strtotime('+6 days', $startOfWeek)) . ', ' . date('Y', $startOfWeek);
 ?>
 
 <div class="row mb-4">
@@ -28,27 +49,75 @@ $weekRangeText = date('M d', $startOfWeek) . ' - ' . date('M d', strtotime('+6 d
 <div class="card">
     <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center py-3">
         <div class="btn-group" id="view-toggle">
-            <button class="btn btn-outline-secondary btn-sm">Day</button>
-            <button class="btn btn-primary btn-sm">Week</button>
-            <button class="btn btn-outline-secondary btn-sm">Month</button>
+            <a href="?view=day&date=<?php echo date('Y-m-d', $today); ?>" class="btn <?php echo $view == 'day' ? 'btn-primary' : 'btn-outline-secondary'; ?> btn-sm">Day</a>
+            <a href="?view=week&date=<?php echo date('Y-m-d', $today); ?>" class="btn <?php echo $view == 'week' ? 'btn-primary' : 'btn-outline-secondary'; ?> btn-sm">Week</a>
+            <a href="?view=month&date=<?php echo date('Y-m-d', $today); ?>" class="btn <?php echo $view == 'month' ? 'btn-primary' : 'btn-outline-secondary'; ?> btn-sm">Month</a>
         </div>
-        <h5 class="mb-0" id="current-date-range"><?php echo $weekRangeText; ?></h5>
+        <h5 class="mb-0 fw-bold" id="current-date-range"><?php echo $rangeText; ?></h5>
         <div class="btn-group">
-            <a href="?date=<?php echo date('Y-m-d', strtotime('-1 week', $startOfWeek)); ?>" class="btn btn-outline-secondary btn-sm"><i class="fas fa-chevron-left"></i></a>
-            <a href="?date=<?php echo date('Y-m-d'); ?>" class="btn btn-outline-secondary btn-sm">Today</a>
-            <a href="?date=<?php echo date('Y-m-d', strtotime('+1 week', $startOfWeek)); ?>" class="btn btn-outline-secondary btn-sm"><i class="fas fa-chevron-right"></i></a>
+            <a href="?view=<?php echo $view; ?>&date=<?php echo $prevDate; ?>" class="btn btn-outline-secondary btn-sm"><i class="fas fa-chevron-left"></i></a>
+            <a href="?view=<?php echo $view; ?>&date=<?php echo date('Y-m-d'); ?>" class="btn btn-outline-secondary btn-sm">Today</a>
+            <a href="?view=<?php echo $view; ?>&date=<?php echo $nextDate; ?>" class="btn btn-outline-secondary btn-sm"><i class="fas fa-chevron-right"></i></a>
         </div>
     </div>
     <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-bordered mb-0 text-center" style="min-width: 800px;">
-                <thead>
-                    <tr>
-                        <th style="width: 100px;">Time</th>
-                        <?php foreach($weekDates as $day) echo "<th>$day</th>"; ?>
-                    </tr>
-                </thead>
-                <tbody>
+        <?php if ($view == 'month'): ?>
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0 text-center" style="min-width: 800px; table-layout: fixed;">
+                    <thead>
+                        <tr class="table-light">
+                            <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
+                        $firstDayOfWeek = date('w', $startOfMonth);
+                        $daysInMonth = date('t', $today);
+                        $dayCounter = 1;
+                        $rows = ceil(($daysInMonth + $firstDayOfWeek) / 7);
+                        
+                        for($r = 0; $r < $rows; $r++):
+                        ?>
+                        <tr>
+                            <?php for($c = 0; $c < 7; $c++): ?>
+                            <td style="height: 120px; vertical-align: top; padding: 5px; background-color: <?php echo ($dayCounter > $daysInMonth || ($r == 0 && $c < $firstDayOfWeek)) ? '#f1f5f9' : '#fff'; ?>;">
+                                <?php if(($r > 0 || $c >= $firstDayOfWeek) && $dayCounter <= $daysInMonth): ?>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="fw-bold small"><?php echo $dayCounter; ?></span>
+                                    </div>
+                                    <?php 
+                                    $currentFullDate = date('Y-m-', $today) . sprintf('%02d', $dayCounter);
+                                    foreach($data['appointments'] as $app): 
+                                        if(date('Y-m-d', strtotime($app->start_time)) == $currentFullDate):
+                                    ?>
+                                        <div class="badge <?php echo ($app->status == 'Completed') ? 'bg-success' : 'bg-primary'; ?> w-100 text-start mb-1" 
+                                             style="font-size: 10px; cursor: pointer;"
+                                             onclick="manageAppointment(<?php echo $app->id; ?>, '<?php echo addslashes($app->patient_name); ?>', '<?php echo date('h:i A', strtotime($app->start_time)); ?>')">
+                                            <?php echo date('H:i', strtotime($app->start_time)); ?>: <?php echo $app->patient_name; ?>
+                                        </div>
+                                    <?php 
+                                        endif;
+                                    endforeach;
+                                    $dayCounter++;
+                                endif; 
+                                ?>
+                            </td>
+                            <?php endfor; ?>
+                        </tr>
+                        <?php endfor; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0 text-center" style="min-width: 800px;">
+                    <thead>
+                        <tr class="table-light">
+                            <th style="width: 100px;">Time</th>
+                            <?php foreach($weekDates as $day) echo "<th>$day</th>"; ?>
+                        </tr>
+                    </thead>
+                    <tbody>
                     <?php 
                     $times = [
                         '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', 
@@ -100,6 +169,7 @@ $weekRangeText = date('M d', $startOfWeek) . ' - ' . date('M d', strtotime('+6 d
                 </tbody>
             </table>
         </div>
+        <?php endif; ?>
     </div>
 </div>
 
