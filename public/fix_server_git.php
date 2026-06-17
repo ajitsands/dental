@@ -41,6 +41,21 @@ $ignoreOutput = shell_exec('git update-index --assume-unchanged config/database.
 echo $ignoreOutput ? trim($ignoreOutput) : "Done";
 echo "\n----------------------------------------\n";
 
+// 4.5. Remove untracked conflicting files
+$conflictingFiles = [
+    $projectRoot . '/App.zip',
+    $projectRoot . '/public/check_git.php',
+    $projectRoot . '/public/deploy_webhook.php',
+    $projectRoot . '/public/fix_server_git.php'
+];
+foreach ($conflictingFiles as $file) {
+    if (file_exists($file)) {
+        unlink($file);
+        echo "✔ Removed untracked file: " . basename($file) . "\n";
+    }
+}
+echo "----------------------------------------\n";
+
 // 5. Pull latest changes
 echo "Executing: git pull origin main\n";
 $pullOutput = shell_exec('git pull origin main 2>&1');
