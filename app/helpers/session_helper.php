@@ -1,9 +1,7 @@
 <?php
 // app/helpers/session_helper.php
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// Session helper handles flash messages and authentication checks
 
 // Flash message helper
 function flash($name = '', $message = '', $class = 'alert alert-success') {

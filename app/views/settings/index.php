@@ -122,6 +122,11 @@
                                         <button class="btn btn-sm btn-outline-primary" onclick="openEditBranchModal(<?php echo $branch->id; ?>)">
                                             <i class="fas fa-edit"></i> Edit
                                         </button>
+                                        <?php if ($data['isSuperAdmin']): ?>
+                                        <button class="btn btn-sm btn-outline-danger ms-1" onclick="openDeleteBranchModal(<?php echo $branch->id; ?>, '<?php echo addslashes($branch->name); ?>')">
+                                            <i class="fas fa-trash-alt"></i> Delete
+                                        </button>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -281,11 +286,73 @@
     </div>
 </div>
 
+<?php if ($data['isSuperAdmin']): ?>
+<!-- Delete Branch Modal -->
+<div class="modal fade" id="deleteBranchModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-danger d-flex align-items-center">
+                    <i class="fas fa-exclamation-triangle me-2"></i> Delete Clinic Branch
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="deleteBranchForm">
+                    <input type="hidden" name="id" id="deleteBranchId">
+                    <p class="mb-3">You are about to delete the branch: <strong id="deleteBranchNameDisplay" class="text-primary"></strong></p>
+                    
+                    <div class="alert alert-warning border-0 small py-2 px-3 mb-4 d-flex align-items-start" style="background-color: #fffbeb; color: #b45309; border-radius: 12px;">
+                        <i class="fas fa-info-circle me-2 mt-1"></i>
+                        <div>Deleting a branch cannot be undone. Please choose how you want to handle patients and transaction history associated with this branch.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small uppercase text-muted mb-2">Select Action Preference</label>
+                        
+                        <div class="form-check p-3 mb-2 border rounded-3" style="cursor: pointer;" onclick="document.getElementById('actionDelete').click(); selectDeleteAction('delete')">
+                            <input class="form-check-input" type="radio" name="action_type" id="actionDelete" value="delete" checked>
+                            <label class="form-check-label fw-bold ms-1" style="cursor: pointer;">
+                                Permanent Purge
+                            </label>
+                            <div class="text-muted small ms-4">Delete the branch and permanently delete all patients, appointments, billing invoices, inventory logs, and staff associated with it.</div>
+                        </div>
+                        
+                        <div class="form-check p-3 border rounded-3" style="cursor: pointer;" onclick="document.getElementById('actionTransfer').click(); selectDeleteAction('transfer')">
+                            <input class="form-check-input" type="radio" name="action_type" id="actionTransfer" value="transfer">
+                            <label class="form-check-label fw-bold ms-1" style="cursor: pointer;">
+                                Transfer Data to Another Branch
+                            </label>
+                            <div class="text-muted small ms-4">Move patients, appointments, billing history, and staff to a different branch before deleting the empty branch.</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 d-none" id="targetBranchWrapper">
+                        <label class="form-label fw-bold small text-muted">Select Target Branch</label>
+                        <select name="target_branch_id" id="targetBranchSelect" class="form-select">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-link text-muted" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger px-4 rounded-pill shadow" id="confirmDeleteBranchBtn" onclick="confirmDeleteBranch()">Confirm & Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <script>
 let branchModal;
+let deleteBranchModal;
 
 $(document).ready(function() {
     branchModal = new bootstrap.Modal(document.getElementById('branchModal'));
+    <?php if ($data['isSuperAdmin']): ?>
+    deleteBranchModal = new bootstrap.Modal(document.getElementById('deleteBranchModal'));
+    <?php endif; ?>
     
     // Maintain active tab on page reload if any
     const activeTab = localStorage.getItem('activeSettingsTab');
@@ -464,6 +531,115 @@ function saveBranch() {
         }
     });
 }
+
+<?php if ($data['isSuperAdmin']): ?>
+function openDeleteBranchModal(id, name) {
+    const currentBranchId = parseInt('<?php echo $_SESSION['branch_id']; ?>');
+    if (id === currentBranchId) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Action Blocked',
+            text: 'You cannot delete the branch you are currently logged in to or impersonating. Please switch branches first.'
+        });
+        return;
+    }
+
+    const totalBranches = $('#branchTable tbody tr').length;
+    if (totalBranches <= 1) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Action Blocked',
+            text: 'Cannot delete this branch. At least one branch must remain in the system.'
+        });
+        return;
+    }
+
+    $('#deleteBranchId').val(id);
+    $('#deleteBranchNameDisplay').text(name);
+    
+    // Reset selections
+    $('#actionDelete').prop('checked', true);
+    $('#targetBranchWrapper').addClass('d-none');
+    
+    // Populate target branch list dynamically (excluding this branch)
+    const select = $('#targetBranchSelect');
+    select.empty();
+    
+    $('#branchTable tbody tr').each(function() {
+        const rowId = parseInt($(this).attr('id').replace('branch-row-', ''));
+        if (rowId !== id) {
+            const rowName = $(this).find('.branch-name').text();
+            select.append(`<option value="${rowId}">${rowName}</option>`);
+        }
+    });
+
+    deleteBranchModal.show();
+}
+
+function selectDeleteAction(type) {
+    if (type === 'transfer') {
+        $('#targetBranchWrapper').removeClass('d-none');
+    } else {
+        $('#targetBranchWrapper').addClass('d-none');
+    }
+}
+
+function confirmDeleteBranch() {
+    const btn = $('#confirmDeleteBranchBtn');
+    const originalText = btn.text();
+    const formData = $('#deleteBranchForm').serialize();
+    const actionType = $('input[name="action_type"]:checked').val();
+    const branchName = $('#deleteBranchNameDisplay').text();
+    
+    const confirmMessage = actionType === 'delete' 
+        ? `Are you absolutely sure you want to permanently delete "${branchName}" and ALL of its patient/billing data? This cannot be undone.`
+        : `Are you sure you want to delete "${branchName}" and transfer its records to the selected branch?`;
+        
+    Swal.fire({
+        title: 'Are you sure?',
+        text: confirmMessage,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#4b5563',
+        confirmButtonText: 'Yes, Proceed'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Processing...');
+            
+            $.ajax({
+                url: '<?php echo BASE_URL; ?>/settings/deleteBranch',
+                type: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: response.message
+                        }).then(() => {
+                            location.reload();
+                        });
+                        deleteBranchModal.hide();
+                    } else {
+                        Swal.fire('Error', response.message, 'error');
+                        btn.prop('disabled', false).text(originalText);
+                    }
+                },
+                error: function(xhr) {
+                    let errMsg = 'Connection failed';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errMsg = xhr.responseJSON.message;
+                    }
+                    Swal.fire('Error', errMsg, 'error');
+                    btn.prop('disabled', false).text(originalText);
+                }
+            });
+        }
+    });
+}
+<?php endif; ?>
 </script>
 
 <?php require_once APPROOT . '/app/views/layouts/footer.php'; ?>

@@ -1,12 +1,8 @@
 <?php
 // config/config.php
 
-define('APP_NAME', 'DenSmart');
-define('BASE_URL', 'http://localhost:8080');
-define('CURRENCY_SYMBOL', '₹');
-define('APP_TITLE', 'DenSmart Dental Clinic');
+if(!defined('APP_NAME')) define('APP_NAME', 'DenSmart');
+if(!defined('BASE_URL')) define('BASE_URL', 'http://localhost:8080'); // Should be changed on server
+if(!defined('CURRENCY_SYMBOL')) define('CURRENCY_SYMBOL', '₹');
+if(!defined('APP_TITLE')) define('APP_TITLE', 'DenSmart Dental Clinic');
 
-// Session configuration
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-}

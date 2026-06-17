@@ -1,5 +1,22 @@
 <?php
 // public/index.php
+ob_start(); // Buffer output to prevent "headers already sent"
+
+// CORS Headers - Allow requests from the main landing page
+header("Access-Control-Allow-Origin: https://densmart.us");
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+
+// Handle Preflight OPTIONS requests
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 

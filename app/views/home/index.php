@@ -23,11 +23,15 @@
             --bg-light: #f8fafc;
         }
 
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             color: var(--text-dark);
             background-color: white;
-            overflow-x: hidden;
         }
 
         h1, h2, h3, h4, h5, h6, .navbar-brand, .btn {
@@ -142,9 +146,9 @@
         /* CTA */
         .cta-section {
             background: var(--primary);
-            padding: 100px 0;
-            border-radius: 40px;
-            margin: 100px 20px;
+            padding: 80px 40px;
+            border-radius: 30px;
+            margin: 80px 0;
             color: white;
             text-align: center;
         }
@@ -192,6 +196,49 @@
         }
         footer a:hover {
             color: white;
+        }
+        /* Responsive Adjustments */
+        @media (max-width: 991.98px) {
+            .hero-section {
+                padding: 120px 0 60px;
+                text-align: center;
+            }
+            .hero-title {
+                font-size: 42px;
+            }
+            .hero-subtitle {
+                margin: 0 auto 30px;
+            }
+            .hero-section .d-flex {
+                justify-content: center;
+            }
+            .mockup-wrapper {
+                margin-top: 50px;
+            }
+            .mockup-floating-card {
+                display: none; /* Hide floating cards on mobile to avoid overlap */
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .hero-title {
+                font-size: 36px;
+            }
+            .section-title {
+                font-size: 32px;
+            }
+            .cta-section {
+                margin: 60px 15px;
+                padding: 60px 20px;
+                border-radius: 24px;
+            }
+            .cta-section h2 {
+                font-size: 28px;
+            }
+            .hero-section .btn-lg {
+                padding: 12px 25px !important;
+                font-size: 16px !important;
+            }
         }
     </style>
 </head>
@@ -373,7 +420,7 @@
                 <h5>Product</h5>
                 <a href="#">Features</a>
                 <a href="#">Security</a>
-                <a href="#">Integrations</a>
+                <a href="<?php echo BASE_URL; ?>/auth/login" class="text-primary fw-bold"><i class="fas fa-shield-alt me-1"></i> Superadmin Console</a>
                 <a href="#">API</a>
             </div>
             <div class="col-6 col-lg-2">

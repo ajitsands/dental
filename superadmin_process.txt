@@ -1,0 +1,76 @@
+In the DenSmart application, the Super Admin role acts as a master administrator overseeing multiple branches (multi-tenancy).
+
+Here is an explanation of what the Super Admin options are and how they work, both from a user perspective and technically under the hood:
+
+1. Key Super Admin Features (Options)
+   Global Dashboard (Master Console):
+   Provides a unified dashboard aggregating financial statistics (Revenue, Payables to staff wallets, and outstanding Receivables) from all clinic branches.
+   Summarizes financial health by country (e.g., India, Bahrain, Saudi Arabia) to organize local currency and tax zones.
+   One-Click Branch Impersonation ("Launch Branch"):
+   Enables the Super Admin to step into any branch's specific interface instantly, allowing them to view and manage that branch's patients, appointments, billing, staff, and inventory as if they were a local administrator.
+   Multi-Branch Operations Management:
+   Add new clinic branches and customize branch settings (address, local tax rates, and logo).
+   Review financial ledger summaries across the entire organization.
+2. How it Works (User Flow)
+   Login: The user logs in using the credentials superadmin@sandslab.com with password admin123.
+   Landing on Master Console: Because their role is Super Admin, they bypass the regular dashboard and are taken to the Global Dashboard listing all branches and global revenue.
+   Impersonating a Branch:
+   The Super Admin clicks the "Launch Branch" button next to a branch (e.g., Rifa Branch).
+   The system switches their session context. An alert bar appears at the top saying: Viewing: [Branch Name] | Back to Global.
+   They can now manage patients, queue appointments, and raise invoices for that branch.
+   Returning to Master Console: The Super Admin clicks the "Back to Global" button to return to the multi-branch global view.
+3. How it Works Under the Hood (Technical Logic)
+   The routing and impersonation flow is handled dynamically inside
+
+Dashboard.php
+and
+
+header.php
+:
+
+Role Validation: The system identifies the user's role using $\_SESSION['role_id']. A value of 6 indicates Super Admin.
+Dashboard Routing: When visiting the dashboard (/dashboard), the index action checks if the user is a Super Admin:
+
+Session Switch (switchBranch): When a Super Admin selects a branch to impersonate, the switchBranch($id) controller method:
+Fetches the branch's localized settings (e.g., timezone, tax type like VAT or GST, and tax percentage) from the database.
+Sets $\_SESSION['impersonating_branch'] = true.
+Temporarily overrides $\_SESSION['branch_id'] and localized parameters to that branch's settings.
+When returning, switchBranch('global') unsets $\_SESSION['impersonating_branch'] and restores global values.
+System Settings Access: Inside
+
+Settings.php
+, only Super Admins are permitted to call addBranch or manage branches they are not currently logged into. Regular branch admins are restricted to modifying their own branch information.
+
+Dashboard.php
+and
+
+header.php
+:Role Validation: The system identifies the user's role using $\_SESSION['role_id']. A value of 6 indicates Super Admin.
+Dashboard Routing: When visiting the dashboard (/dashboard), the index action checks if the user is a Super Admin:
+
+Session Switch (switchBranch): When a Super Admin selects a branch to impersonate, the switchBranch($id) controller method:
+Fetches the branch's localized settings (e.g., timezone, tax type like VAT or GST, and tax percentage) from the database.
+Sets $\_SESSION['impersonating_branch'] = true.
+Temporarily overrides $\_SESSION['branch_id'] and localized parameters to that branch's settings.
+When returning, switchBranch('global') unsets $\_SESSION['impersonating_branch'] and restores global values.
+System Settings Access: Inside
+
+Settings.php
+, only Super Admins are permitted to call addBranch or manage branches they are not currently logged into. Regular branch admins are restricted to modifying their own branch information.
+
+Dashboard.php
+and
+
+header.php
+:Role Validation: The system identifies the user's role using $\_SESSION['role_id']. A value of 6 indicates Super Admin.
+Dashboard Routing: When visiting the dashboard (/dashboard), the index action checks if the user is a Super Admin:
+
+Session Switch (switchBranch): When a Super Admin selects a branch to impersonate, the switchBranch($id) controller method:
+Fetches the branch's localized settings (e.g., timezone, tax type like VAT or GST, and tax percentage) from the database.
+Sets $\_SESSION['impersonating_branch'] = true.
+Temporarily overrides $\_SESSION['branch_id'] and localized parameters to that branch's settings.
+When returning, switchBranch('global') unsets $\_SESSION['impersonating_branch'] and restores global values.
+System Settings Access: Inside
+
+Settings.php
+, only Super Admins are permitted to call addBranch or manage branches they are not currently logged into. Regular branch admins are restricted to modifying their own branch information.

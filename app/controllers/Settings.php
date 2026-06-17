@@ -181,4 +181,76 @@ class Settings extends Controller {
         header('Location: ' . BASE_URL . '/settings');
         exit;
     }
+
+    public function deleteBranch() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            header('Content-Type: application/json');
+
+            // 1. Authorization check
+            $isSuperAdmin = ((int)$_SESSION['role_id'] === 6);
+            if (!$isSuperAdmin) {
+                http_response_code(403);
+                echo json_encode(['status' => 'error', 'message' => 'Unauthorized access. Only Super Admins can delete branches.']);
+                exit;
+            }
+
+            $id = isset($_POST['id']) ? (int)$_POST['id'] : null;
+            $actionType = $_POST['action_type'] ?? ''; // 'delete' or 'transfer'
+            $targetBranchId = isset($_POST['target_branch_id']) ? (int)$_POST['target_branch_id'] : null;
+
+            if (!$id) {
+                echo json_encode(['status' => 'error', 'message' => 'Branch ID is required.']);
+                exit;
+            }
+
+            // 2. Prevent deleting the active/current branch (cannot delete branch you are logged into/impersonating)
+            $currentBranchId = (int)$_SESSION['branch_id'];
+            if ($id === $currentBranchId) {
+                echo json_encode(['status' => 'error', 'message' => 'You cannot delete the branch you are currently logged in to or impersonating. Please switch branches first.']);
+                exit;
+            }
+
+            // 3. Prevent deleting the last remaining branch
+            $branches = $this->branchModel->getAllBranches();
+            if (count($branches) <= 1) {
+                echo json_encode(['status' => 'error', 'message' => 'Cannot delete this branch. At least one branch must remain in the system.']);
+                exit;
+            }
+
+            // 4. Handle Action
+            if ($actionType === 'transfer') {
+                if (!$targetBranchId) {
+                    echo json_encode(['status' => 'error', 'message' => 'Target branch must be selected for transferring data.']);
+                    exit;
+                }
+                if ($targetBranchId === $id) {
+                    echo json_encode(['status' => 'error', 'message' => 'Target branch cannot be the branch you are deleting.']);
+                    exit;
+                }
+                
+                // Verify target branch exists
+                $targetBranch = $this->branchModel->getBranchById($targetBranchId);
+                if (!$targetBranch) {
+                    echo json_encode(['status' => 'error', 'message' => 'Target branch not found.']);
+                    exit;
+                }
+
+                $result = $this->branchModel->deleteBranchAndTransferData($id, $targetBranchId);
+                $message = 'Branch deleted and all data successfully transferred to ' . $targetBranch->name . '.';
+            } elseif ($actionType === 'delete') {
+                $result = $this->branchModel->deleteBranchWithAllData($id);
+                $message = 'Branch and all associated data permanently deleted.';
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Invalid action type.']);
+                exit;
+            }
+
+            if ($result) {
+                echo json_encode(['status' => 'success', 'message' => $message]);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Database operation failed during branch deletion.']);
+            }
+            exit;
+        }
+    }
 }

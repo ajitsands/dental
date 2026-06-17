@@ -156,7 +156,7 @@
             color: #ffffff !important;
         }
 
-        .nav-link {
+        .navbar-nav .nav-link {
             color: rgba(255, 255, 255, 0.8) !important;
             font-weight: 500;
             padding: 0.5rem 1rem !important;
@@ -164,7 +164,7 @@
             transition: all 0.3s ease;
         }
 
-        .nav-link:hover, .nav-link.active {
+        .navbar-nav .nav-link:hover, .navbar-nav .nav-link.active {
             background-color: rgba(255, 255, 255, 0.1);
             color: #ffffff !important;
         }
@@ -408,6 +408,10 @@
                             <span class="d-none d-md-inline text-white"><?php echo $_SESSION['user_name'] ?? 'User'; ?></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                            <?php if ($_SESSION['role_id'] == 6): ?>
+                            <li><a class="dropdown-item fw-bold text-primary" href="<?php echo BASE_URL; ?>/dashboard?global=1"><i class="fas fa-chart-line me-2"></i> Master Console</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <?php endif; ?>
                             <li><a class="dropdown-item" href="<?php echo BASE_URL; ?>/settings"><i class="fas fa-cog me-2"></i> <?php echo __('settings'); ?></a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item text-danger" href="<?php echo BASE_URL; ?>/auth/logout"><i class="fas fa-sign-out-alt me-2"></i> <?php echo __('logout'); ?></a></li>

@@ -21,12 +21,24 @@ class Home extends Controller {
 
             // Target email
             $to = "ajitsands@gmail.com";
-            $subject = "New Demo Request from DenSmart Landing Page";
-            $message = "Company: $company\nMobile: $mobile\nEmail: $email\nCountry: $country\nNote: $note";
-            $headers = "From: noreply@sandslab.com";
+            $subject = "New Demo Request - DenSmart ($company)";
+            
+            $body = "<h2>New Lead from DenSmart Website</h2>";
+            $body .= "<p><strong>Clinic/Company:</strong> $company</p>";
+            $body .= "<p><strong>Mobile:</strong> $mobile</p>";
+            $body .= "<p><strong>Email:</strong> $email</p>";
+            $body .= "<p><strong>Country:</strong> $country</p>";
+            $body .= "<p><strong>Message:</strong><br>$note</p>";
+            $body .= "<hr><p><small>This email was sent from the DenSmart automated demo request system.</small></p>";
 
-            // Note: PHP mail() requires a configured SMTP server
-            // @mail($to, $subject, $message, $headers);
+            // Headers for HTML email
+            $headers = "MIME-Version: 1.0" . "\r\n";
+            $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+            $headers .= "From: DenSmart Leads <noreply@densmart.us>" . "\r\n";
+            $headers .= "Reply-To: $email" . "\r\n";
+
+            // Send email
+            @mail($to, $subject, $body, $headers);
 
             echo json_encode(['status' => 'success', 'message' => 'Thank you for your interest! We will contact you soon.']);
             exit;
