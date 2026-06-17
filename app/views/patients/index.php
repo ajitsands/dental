@@ -6,6 +6,9 @@
         <p class="text-muted"><?php echo __('manage_all_patients'); ?></p>
     </div>
     <div class="col-md-4 text-end">
+        <button onclick="openImportModal()" class="btn btn-outline-success rounded-pill px-4 shadow-sm me-2">
+            <i class="fas fa-file-import me-1"></i> Import Patients
+        </button>
         <a href="<?php echo BASE_URL; ?>/patient/register" class="btn btn-primary rounded-pill px-4 shadow-sm">
             <i class="fas fa-plus me-1"></i> New Patient
         </a>
@@ -90,8 +93,61 @@
     </div>
 </div>
 
+<!-- Import Patients Modal -->
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-success"><i class="fas fa-file-import me-2"></i> Import Patients</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="importForm" enctype="multipart/form-data">
+                    <div class="mb-3 p-3 bg-light rounded-3">
+                        <h6 class="fw-bold mb-2">Instructions:</h6>
+                        <ul class="small text-muted mb-0 ps-3">
+                            <li>Download the CSV template using the button below.</li>
+                            <li>Open it in Excel or Google Sheets, add patient details, and save as CSV.</li>
+                            <li>Required field: <strong>Name</strong>.</li>
+                            <li>Gender must be: <strong>Male</strong>, <strong>Female</strong>, or <strong>Other</strong>.</li>
+                            <li>Age should be a positive number.</li>
+                        </ul>
+                        <div class="mt-3 text-center">
+                            <a href="<?php echo BASE_URL; ?>/patient/downloadTemplate" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                <i class="fas fa-download me-1"></i> Download CSV Template
+                            </a>
+                        </div>
+                    </div>
+
+                    <?php if($data['isSuperAdmin']): ?>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Select Branch to Import Into</label>
+                        <select name="branch_id" id="importBranch" class="form-select border-primary-subtle" required>
+                            <option value="">-- Select Branch --</option>
+                            <?php foreach($data['branches'] as $branch): ?>
+                                <option value="<?php echo $branch->id; ?>"><?php echo $branch->name; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <?php endif; ?>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Choose CSV File</label>
+                        <input type="file" name="patient_file" id="patientFile" class="form-control" accept=".csv" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-link text-muted" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success px-5 rounded-pill shadow" id="importSubmitBtn" onclick="submitImport()">Import</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 let rxModal;
+let importModal;
 
 $(document).ready(function() {
     $('#patientTable').DataTable({
@@ -99,8 +155,9 @@ $(document).ready(function() {
         "language": dtLanguage
     });
 
-    // Initialize modal after everything is loaded
+    // Initialize modals
     rxModal = new bootstrap.Modal(document.getElementById('rxModal'));
+    importModal = new bootstrap.Modal(document.getElementById('importModal'));
 });
 
 function viewPrescriptions(id, name) {
@@ -135,6 +192,57 @@ function viewPrescriptions(id, name) {
             $('#rxEmpty').removeClass('d-none');
         }
     }, 'json');
+}
+
+function openImportModal() {
+    $('#importForm')[0].reset();
+    if($('#importBranch').length) {
+        $('#importBranch').val('');
+    }
+    importModal.show();
+}
+
+function submitImport() {
+    const fileInput = document.getElementById('patientFile');
+    if(!fileInput.files.length) {
+        Swal.fire('Error', 'Please select a CSV file to import.', 'error');
+        return;
+    }
+
+    if($('#importBranch').length && !$('#importBranch').val()) {
+        Swal.fire('Error', 'Please select a branch to import patients into.', 'error');
+        return;
+    }
+
+    const btn = $('#importSubmitBtn');
+    btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Importing...');
+
+    const formData = new FormData(document.getElementById('importForm'));
+
+    $.ajax({
+        url: '<?php echo BASE_URL; ?>/patient/import',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        dataType: 'json',
+        success: function(response) {
+            if(response.status === 'success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: response.message
+                }).then(() => location.reload());
+            } else {
+                Swal.fire('Error', response.message, 'error');
+                btn.prop('disabled', false).text('Import');
+            }
+        },
+        error: function() {
+            Swal.fire('Error', 'Connection failed or server error', 'error');
+            btn.prop('disabled', false).text('Import');
+        }
+    });
 }
 </script>
 

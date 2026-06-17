@@ -53,7 +53,7 @@ class PatientModel extends Model {
     }
 
     public function addPatient($data) {
-        $branchId = $_SESSION['branch_id'] ?? 1;
+        $branchId = $data['branch_id'] ?? $_SESSION['branch_id'] ?? 1;
 
         $this->db->query('INSERT INTO patients (branch_id, unique_id, name, age, gender, contact, email, medical_history, dental_history, medical_alerts) 
                           VALUES (:branch_id, :unique_id, :name, :age, :gender, :contact, :email, :medical_history, :dental_history, :medical_alerts)');
