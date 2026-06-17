@@ -39,6 +39,14 @@ $ignoreOutput = shell_exec('git update-index --assume-unchanged config/database.
 echo $ignoreOutput ? trim($ignoreOutput) : "Done";
 echo "\n----------------------------------------\n";
 
+// 4.5. Remove itself (untracked file conflict candidate) before pulling
+$selfFile = $projectRoot . '/public/force_pull.php';
+if (file_exists($selfFile)) {
+    unlink($selfFile);
+    echo "✔ Unlinked self (untracked file conflict) to allow merge.\n";
+}
+echo "----------------------------------------\n";
+
 // 5. Pull latest code from GitHub
 echo "Executing: git pull origin main\n";
 $pullOutput = shell_exec('git pull origin main 2>&1');
