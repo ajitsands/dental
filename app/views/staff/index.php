@@ -236,6 +236,7 @@ function openAddModal() {
     $('#passHint').hide();
     $('#staffRole').prop('disabled', false);
     $('#staffStatus').prop('disabled', false);
+    $('#staffStatus option[value="inactive"]').show();
     staffModal.show();
 }
 
@@ -244,6 +245,7 @@ function openEditModal(id) {
     $('#passHint').show();
     $('#staffRole').prop('disabled', false);
     $('#staffStatus').prop('disabled', false);
+    $('#staffStatus option[value="inactive"]').show();
     $.get('<?php echo BASE_URL; ?>/staff/get/' + id, function(response) {
         if(response.status === 'success') {
             const d = response.data;
@@ -259,6 +261,7 @@ function openEditModal(id) {
             // If the user being edited is a Super Admin, lock role/status and force active
             if(parseInt(d.role_id) === 6) {
                 $('#staffStatus').val('active');
+                $('#staffStatus option[value="inactive"]').hide();
                 $('#staffRole').prop('disabled', true);
                 $('#staffStatus').prop('disabled', true);
             }
