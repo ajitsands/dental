@@ -70,9 +70,11 @@
                                 <button class="btn btn-sm btn-outline-primary" onclick="openEditModal(<?php echo $s->id; ?>)">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="deleteStaff(<?php echo $s->id; ?>, '<?php echo $s->name; ?>')">
+                                <?php if ($s->role_name !== 'Super Admin'): ?>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteStaff(<?php echo $s->id; ?>, '<?php echo $s->name; ?>')" title="Delete Staff">
                                     <i class="fas fa-trash"></i>
                                 </button>
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>

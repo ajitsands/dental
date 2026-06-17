@@ -114,6 +114,13 @@ class Staff extends Controller {
                 exit;
             }
 
+            // Prevent deleting Super Admin users
+            $targetUser = $this->userModel->getUserById($id);
+            if ($targetUser && (int)$targetUser->role_id === 6) {
+                echo json_encode(['status' => 'error', 'message' => 'Super Admin accounts cannot be deleted']);
+                exit;
+            }
+
             if ($this->userModel->deleteUser($id)) {
                 echo json_encode(['status' => 'success', 'message' => 'Staff member removed']);
             } else {
