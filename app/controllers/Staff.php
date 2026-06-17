@@ -62,7 +62,7 @@ class Staff extends Controller {
                 'branch_id' => $branch_id,
                 'name' => trim($_POST['name']),
                 'email' => trim($_POST['email']),
-                'role_id' => $_POST['role_id'],
+                'role_id' => $_POST['role_id'] ?? null,
                 'phone' => trim($_POST['phone']),
                 'commission_pct' => trim($_POST['commission_pct'] ?? 0),
                 'status' => $_POST['status'] ?? 'active'
@@ -74,6 +74,17 @@ class Staff extends Controller {
             }
 
             if ($data['id']) {
+                $existingUser = $this->userModel->getUserById($data['id']);
+                if ($existingUser) {
+                    // Safeguard: If existing user is a Super Admin, force status to active and keep their role
+                    if ((int)$existingUser->role_id === 6) {
+                        $data['role_id'] = 6;
+                        $data['status'] = 'active';
+                    } else if ($data['role_id'] === null) {
+                        $data['role_id'] = $existingUser->role_id;
+                    }
+                }
+                
                 $result = $this->userModel->updateUser($data);
                 $message = 'Staff member updated successfully';
             } else {

@@ -234,12 +234,16 @@ function openAddModal() {
     $('#staffForm')[0].reset();
     $('#staffId').val('');
     $('#passHint').hide();
+    $('#staffRole').prop('disabled', false);
+    $('#staffStatus').prop('disabled', false);
     staffModal.show();
 }
 
 function openEditModal(id) {
     $('#modalTitle').text('Edit Staff Member');
     $('#passHint').show();
+    $('#staffRole').prop('disabled', false);
+    $('#staffStatus').prop('disabled', false);
     $.get('<?php echo BASE_URL; ?>/staff/get/' + id, function(response) {
         if(response.status === 'success') {
             const d = response.data;
@@ -251,6 +255,14 @@ function openEditModal(id) {
             $('#staffPhone').val(d.phone);
             $('#staffComm').val(d.commission_pct);
             if($('#staffBranch').length) $('#staffBranch').val(d.branch_id);
+            
+            // If the user being edited is a Super Admin, lock role/status and force active
+            if(parseInt(d.role_id) === 6) {
+                $('#staffStatus').val('active');
+                $('#staffRole').prop('disabled', true);
+                $('#staffStatus').prop('disabled', true);
+            }
+            
             staffModal.show();
         } else {
             Swal.fire('Error', response.message, 'error');
