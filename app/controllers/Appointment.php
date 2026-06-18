@@ -14,10 +14,16 @@ class Appointment extends Controller {
     public function index() {
         $appointments = $this->appointmentModel->getAppointments();
         $patients = $this->patientModel->getPatients();
+        
+        $branch_id = $_SESSION['branch_id'] ?? 1;
+        $userModel = $this->model('User');
+        $dentists = $userModel->getDentistsByBranch($branch_id);
+
         $data = [
             'title' => 'Appointments - DenSmart',
             'appointments' => $appointments,
-            'patients' => $patients
+            'patients' => $patients,
+            'dentists' => $dentists
         ];
         $this->view('appointments/index', $data);
     }
@@ -29,7 +35,7 @@ class Appointment extends Controller {
             // Sanitize and process
             $data = [
                 'patient_id' => $_POST['patient_id'] ?? null,
-                'user_id' => $_SESSION['user_id'] ?? 1,
+                'user_id' => $_POST['user_id'] ?? $_SESSION['user_id'] ?? 1,
                 'chair_id' => $_POST['chair_id'] ?? 1,
                 'start_time' => ($_POST['date'] ?? '') . ' ' . date('H:i:s', strtotime($_POST['time'] ?? '09:00 AM')),
                 'end_time' => ($_POST['date'] ?? '') . ' ' . date('H:i:s', strtotime(($_POST['time'] ?? '09:00 AM') . ' +1 hour')),

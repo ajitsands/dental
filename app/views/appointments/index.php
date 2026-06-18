@@ -223,9 +223,13 @@ if ($view == 'day') {
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Select Dentist</label>
-                            <select name="user_id" class="form-select">
-                                <option value="<?php echo $_SESSION['user_id']; ?>"><?php echo $_SESSION['user_name']; ?> (You)</option>
-                                <option value="2">Dr. Sarah Smith</option>
+                            <select name="user_id" class="form-select" required>
+                                <option value="">-- Select Dentist --</option>
+                                <?php foreach($data['dentists'] as $dentist): ?>
+                                    <option value="<?php echo $dentist->id; ?>" <?php echo ($dentist->id == ($_SESSION['user_id'] ?? 0)) ? 'selected' : ''; ?>>
+                                        <?php echo $dentist->name; ?> <?php echo ($dentist->id == ($_SESSION['user_id'] ?? 0)) ? '(You)' : ''; ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                         <div class="col-md-12">

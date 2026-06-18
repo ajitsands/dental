@@ -78,6 +78,12 @@ class User extends Model {
         return $this->db->resultSet();
     }
 
+    public function getDentistsByBranch($branch_id) {
+        $this->db->query('SELECT * FROM users WHERE branch_id = :branch_id AND role_id = 2 AND status = "active" ORDER BY name ASC');
+        $this->db->bind(':branch_id', $branch_id);
+        return $this->db->resultSet();
+    }
+
     public function getAllStaff() {
         $this->db->query('SELECT u.*, r.name as role_name, b.name as branch_name 
                           FROM users u 
